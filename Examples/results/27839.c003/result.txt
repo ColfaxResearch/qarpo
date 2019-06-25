@@ -1,2 +1,0 @@
-industries
- Inference performed in 22.599ms
