@@ -77,7 +77,10 @@ class Demo:
 				self.input_.append(dict_)
 
 	def submitJob(self, command): 
-		self.command = command
+		if type(command) == 'str':
+			self.command = command
+		else:
+			command = self.command
 		for widget in self.input_:
 
 			value = widget["widget"].value
