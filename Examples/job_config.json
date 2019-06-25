@@ -1,0 +1,268 @@
+{
+	"job": 
+	{
+		"command": "qsub ocr_job.sh -l nodes=1:NODE:ARCH -F 'RESULTS TARGET FP_MODEL'",
+		"output_type": ".txt",        
+		"results_path": "results/", 
+		"results_defines" : "RESULTS",
+		"progress_indicators": 
+		[
+			{ 
+				"file_name": "i_progress.txt", 
+				"title": "Progress"          
+			}
+		],
+		"plots":
+		[
+			{
+				"title" : "",
+				"type" : "time",
+				"xlabel" : "",
+				"ylabel" : "",
+				"selector" : "Target node"
+			}
+		]
+	},
+	"inputs": 
+	[
+		{
+			"Target_node": 
+			{ 
+				"display_name": "Target node",  
+				"type": "select",              
+				"default" : "tank-870", 
+				"defines" : ["NODE"],
+				"options": [
+				{	
+					"name": "Select Node", 
+					"dummy": "True",
+					"controls":
+					{
+						"Target_arch":["Select Architecture", "iei-mustang-f100-a10", "intel-ncs2", "iei-mustang-v100-mx8", "intel-hd-505", "intel-hd-530", "i5-7500", "intel-hd-630", "e3-1268l-v5"]
+					}
+
+				},
+
+				{
+					"name": "IEI/tank-870/SKL", 
+					"defines" :
+					{
+						"NODE" : "idc001skl"
+					},
+					"controls":
+					{
+						"Target_arch":["intel-hd-530", "i5-6500te"]
+					}
+				},
+				{
+					"name": "IEI/tank-870/SKL/HDDLR", 
+					"defines" :
+					{
+						"NODE" : "idc002mx8"
+					},
+					"controls":
+					{
+						"Target_arch":["intel-hd-530", "i5-6500te", "iei-mustang-v100-mx8"]
+					}
+				},
+				{
+					"name": "IEI/tank-870/SKL/FPGA", 
+					"defines" :
+					{
+						"NODE" : "idc003a10"
+					},
+					"controls":
+					{
+						"Target_arch":["intel-hd-530", "i5-6500te", "iei-mustang-f100-a10"]
+					}
+				},
+				{
+					"name": "IEI/tank-870/SKL/NCS2", 
+					"defines" :
+					{
+						"NODE" : "idc004nc2"
+					},
+					"controls":
+					{
+						"Target_arch":["intel-hd-530", "i5-6500te", "intel-ncs2"]
+					}
+				},
+				{
+						"name": "IEI/tank-870/KBL", 
+						"defines" :
+						{
+							"NODE" : "idc006kbl"
+						},
+						"controls":
+						{
+							"Target_arch":["i5-7500t", "intel-hd-630"]
+						}
+					},
+					{
+						"name": "IEI/tank-870/SKL/XEON", 
+						"defines" :
+						{
+							"NODE" : "idc007xv5"
+						},
+						"controls":
+						{
+							"Target_arch":["intel-hd-p530", "e3-1268l-v5"]
+						}
+					},
+					{
+						"name": "UP-Squared", 
+						"defines" :
+						{
+							"NODE" : "idc008u2g"
+						},
+						"controls":
+						{
+							"Target_arch":["intel-hd-505", "e3950", "intel-ncs2"]
+						}
+					},
+
+					{
+						"name": "JWIP/KBL", 
+						"defines":    
+						{
+							"NODE" : "idc009jkl"
+						},
+						"controls":
+						{
+							"Target_arch":["i5-7500", "intel-hd-630"]
+						}
+					},
+					{
+						"name": "JWIP/ATOM", 
+						"defines":    
+						{
+							"NODE" : "idc010jal"
+						},
+						"controls":
+						{
+							"Target_arch":["e3950", "intel-hd-505"]
+						}
+					}
+					]
+				}
+			},
+
+			{
+				"Target_arch":
+				{ 
+					"display_name": "Target architecture", 
+					"type": "select",                
+					"default" : "nodes=1:i5-6500te", 
+					"defines" : ["ARCH", "TARGET", "FP_MODEL"],
+					"options": 
+					[
+						{
+							"name": "Select Architecture", 
+							"dummy": "True"
+
+						},
+
+						{
+							"name": "iei-mustang-f100-a10",
+							"defines":
+							{
+								"ARCH": "iei-mustang-f100-a10",
+								"TARGET": "HETERO:FPGA,CPU",
+								"FP_MODEL": "FP32"
+							}
+						},
+
+						{
+							"name": "intel-ncs2", 
+							"defines" :
+							{
+								"ARCH": "intel-ncs2",
+								"TARGET": "MYRIAD",
+								"FP_MODEL": "FP16"
+							}
+						},
+
+						{
+							"name": "iei-mustang-v100-mx8",
+							"defines":
+							{
+								"ARCH": "iei-mustang-v100-mx8",
+								"TARGET": "MYRIAD",
+								"FP_MODEL": "FP16"
+							}
+						},
+
+						{
+							"name": "intel-hd-505", 
+							"defines":
+							{
+								"ARCH":  "intel-hd-505",
+								"TARGET": "GPU",
+								"FP_MODEL": "FP32"
+							}
+						},
+
+						{
+							"name": "intel-hd-530", 
+							"defines":
+							{
+								"ARCH": "intel-hd-530",
+								"TARGET": "GPU",
+								"FP_MODEL": "FP32"
+							}
+						},
+
+						{
+							"name": "intel-hd-630", 
+							"defines":
+							{
+								"ARCH": "intel-hd-630",
+								"TARGET": "GPU",
+								"FP_MODEL": "FP32"
+							}
+						},
+
+						{
+							"name": "intel-hd-p530", 
+							"defines":
+							{
+								"ARCH": "intel-hd-p530",
+								"TARGET": "GPU",
+								"FP_MODEL": "FP32"
+							}
+						},
+
+						{
+							"name":"i5-6500te",
+							"defines":
+							{
+								"ARCH": "i5-6500te",
+								"TARGET": "CPU",
+								"FP_MODEL": "FP32"
+							}
+						},
+
+						{
+							"name":"i5-7500t",
+							"defines":
+							{
+								"ARCH": "i5-7500t",
+								"TARGET": "CPU",
+								"FP_MODEL": "FP32"
+							}
+						},
+
+						{
+							"name": "e3-1268l-v5", 
+							"defines":
+							{
+								"ARCH": "e3-1268l-v5",
+								"TARGET": "CPU",
+								"FP_MODEL": "FP32"
+							}
+						}
+					]
+				}
+			}
+	]
+}
