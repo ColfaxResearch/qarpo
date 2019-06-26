@@ -15,10 +15,9 @@ if [ "$2" = "HETERO:FPGA,CPU" ]; then
     aocl program acl0 /opt/intel/computer_vision_sdk/bitstreams/a10_vision_design_bitstreams/5-0_PL1_FP11_MobileNet_Clamp.aocx
 fi
 # Running the object detection code
-# -l /opt/intel/computer_vision_sdk/deployment_tools/inference_engine/samples/build/intel64/Release/lib/libcpu_extension.so \
 SAMPLEPATH=$PBS_O_WORKDIR
-python3 classification_sample.py  -m model/${FP_MODEL}/crnn.xml  \
-                                           -i board4.jpg \
+python3 app/classification_sample.py  -m app/model/${FP_MODEL}/crnn.xml  \
+                                           -i app/board4.jpg \
                                            -o $OUTPUT_FILE \
                                            -d $DEVICE
                                            

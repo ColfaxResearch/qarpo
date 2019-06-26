@@ -26,7 +26,7 @@ def progressUpdate(file_name, time_diff, frame_count, video_len):
             progress_file.write(str(remaining_time)+'\n')
             progress_file.write(str(estimated_time)+'\n')
     
-class Demo:
+class Interface:
 
 	def __init__(self, config):
 		container_list = []
@@ -77,7 +77,7 @@ class Demo:
 				self.input_.append(dict_)
 
 	def submitJob(self, command): 
-		if type(command) == 'str':
+		if isinstance(command, str):
 			self.command = command
 		else:
 			command = self.command
@@ -108,7 +108,7 @@ class Demo:
 			return
 
 		p = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
-		output,_ = p.communicate()
+		output, error = p.communicate()
 		jobid = output.decode("utf-8").rstrip()
 		if jobid != "":
 			self.status.value = "<span style='color:green'>&#10004;</span> Job submitted, job ID: {jobid}".format(jobid=jobid)

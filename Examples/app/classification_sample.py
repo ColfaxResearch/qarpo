@@ -29,7 +29,7 @@ import os.path as ops
 from easydict import EasyDict
 from pathlib import Path
 sys.path.insert(0, str(Path().resolve().parent))
-from demoTools.demoutils_tabs import progressUpdate
+from qarpo import progressUpdate
 import json
 
 
@@ -59,7 +59,7 @@ def build_argparser():
 def main():
    
     job_id = os.environ['PBS_JOBID']
-    codec = data_utils.TextFeatureIO(char_dict_path='Config/char_dict.json',ord_map_dict_path=r'Config/ord_map.json')
+    codec = data_utils.TextFeatureIO(char_dict_path='app/Config/char_dict.json',ord_map_dict_path=r'app/Config/ord_map.json')
         
 	
 	
@@ -115,7 +115,13 @@ def main():
     # Start sync inference
     log.info("Starting inference ({} iterations)".format(args.number_iter))
     infer_time = []
-    progress_file_path = os.path.join(args.output_dir,job_id, 'i_progress.txt')
+
+    result_dir = os.path.join(args.output_dir,job_id)
+
+    if not os.path.isdir(result_dir):
+        print(result_dir)
+        os.makedirs(result_dir, exist_ok=True)
+    progress_file_path = os.path.join(result_dir, 'i_progress.txt')
     t0 = time()
     for i in range(args.number_iter):
         #t0 = time()
@@ -155,7 +161,7 @@ def main():
     stats['time'] = str(t1)
     stats['frame'] = str(args.number_iter*n)
     stats['fps'] = str(args.number_iter*n / t1)
-    stats_file = "results/{}/stats.json".format(job_id)
+    stats_file = result_dir+"/stats.json"
     with open(stats_file, 'w') as f:
         json.dump(stats, f)
 

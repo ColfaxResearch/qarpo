@@ -1,9 +1,9 @@
 {
 	"job": 
 	{
-		"command": "qsub ocr_job.sh -l nodes=1:NODE:ARCH -F 'RESULTS TARGET FP_MODEL'",
+		"command": "qsub app/ocr_job.sh -l nodes=1:NODE:ARCH -F 'RESULTS TARGET FP_MODEL'",
 		"output_type": ".txt",        
-		"results_path": "results/", 
+		"results_path": "app/results/", 
 		"results_defines" : "RESULTS",
 		"progress_indicators": 
 		[

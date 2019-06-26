@@ -1,2 +1,3 @@
-from .demoutils_tabs import Demo
+from .demoutils_tabs import Interface
+from .demoutils_tabs import progressUpdate
 
