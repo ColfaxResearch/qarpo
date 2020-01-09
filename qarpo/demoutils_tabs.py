@@ -109,7 +109,7 @@ class Interface:
 
 		p = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
 		output, error = p.communicate()
-		jobid = output.decode("utf-8").rstrip()
+		jobid = output.decode("utf-8").rstrip().split('.')[0]
 		if jobid != "":
 			self.status.value = "<span style='color:green'>&#10004;</span> Job submitted, job ID: {jobid}".format(jobid=jobid)
 		else:
@@ -211,17 +211,11 @@ class Interface:
 				#output.value = ""
 				op_display_button.disabled=True
 				frame.children = widget_list
-				self.tab.set_title(str(frame_id), '{jobid}'.format(jobid=jobid.split(".")[0]))
+				self.tab.set_title(str(frame_id), '{jobid}'.format(jobid=jobid))
 				self.tab.selected_index = frame_id
-			#if not self.display_tab: 
-				#display(self.tab)
-			#	if self.plot:
-			#		display(self.plot_button)
-			#		display(self.plot_img)
-			#	self.display_tab = True
 			# progress
 			id_ = 0
-			self.tab.set_title(str(frame_id), 'Queued: {jobid}'.format(jobid=jobid.split(".")[0]))
+			self.tab.set_title(str(frame_id), 'Queued: {jobid}'.format(jobid=jobid))
 			cmd = "qstat | grep "+jobid
 			running = False
 			while not running:
@@ -230,7 +224,7 @@ class Interface:
 				stat = output.decode("utf-8").rsplit()
 				running = True if stat[4]=='R' else False
  
-			self.tab.set_title(str(frame_id), 'Running: {jobid}'.format(jobid=jobid.split(".")[0]))
+			self.tab.set_title(str(frame_id), 'Running: {jobid}'.format(jobid=jobid))
 			for output_file in progress_info: 
 				progress_bar =  progress_wid[id_]
 				est_time =  progress_wid[id_+1]
@@ -267,7 +261,7 @@ class Interface:
 				time.sleep(0.1) 
 			if self.plot:
 				self.plot_button.disabled=False
-			self.tab.set_title(str(frame_id), 'Done: {jobid}'.format(jobid=jobid.split(".")[0]))
+			self.tab.set_title(str(frame_id), 'Done: {jobid}'.format(jobid=jobid))
 			op_display_button.disabled=False
 			def wrapHTML(event):
 				op_display.value = self.outputHTML(path)
@@ -300,7 +294,7 @@ class Interface:
 			with open(stats) as f:
 				data = json.load(f)
 			time = data['time']
-			frames = data['frame']
+			frames = data['frames']
 			stats_line = "<p>{frames} frames processed in {time} seconds</p>".format(frames=frames, time=time)
 		else:
 			stats_line = ""
@@ -339,7 +333,7 @@ class Interface:
 			type = item['type']
 			y_axis = item['ylabel'] if 'ylabel' in item else None 
 			x_axis = item['xlabel'] if 'xlabel' in item else None 
-			selector = item['selector'] if 'selector' in item else None
+			selector = item['selector'] if 'selector' in item else None 
 			plt.title(title , fontsize=20, color='black', fontweight='bold')
 			plt.ylabel(y_axis, fontsize=16, color=clr)
 			plt.xlabel(x_axis, fontsize=16, color=clr)
@@ -348,15 +342,20 @@ class Interface:
 			diff = 0
 
 			for key, val in self.jobDict.items():
-				job = self.jobDict[key]
-				path = os.path.join(val['output_path'], 'stats.json')
-				label = {"selector" : val['selector'][selector]} if selector else {"selector" : val["jobid"]}
-				if os.path.isfile(path) and not self.jobStillRunning(key):
-					with open(path, "r") as f:
-						data = json.load(f)
-					value = float(data[item["type"]])
-					for key2, val2 in label.items():
-						arch[val2] = round(value, 2)
+                                job = self.jobDict[key]
+                                path = os.path.join(val['output_path'], 'stats.json')
+                                if selector:
+                                    label = ''
+                                    for list_item in selector:
+                                        label += val['selector'][list_item] + '\n'
+                                    label += val['jobid']
+                                else :
+                                    label = val["jobid"]
+                                if os.path.isfile(path) and not self.jobStillRunning(key):
+                                    with open(path, "r") as f:
+                                        data = json.load(f)
+                                    value = float(data[type])
+                                    arch[label] = round(value, 2)
 
 			if len(arch) <= 9:
 				rotation=0
