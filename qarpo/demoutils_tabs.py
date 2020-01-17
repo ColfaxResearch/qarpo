@@ -328,7 +328,7 @@ class Interface:
 		clr = 'xkcd:blue'
 		html = '''<html><body>'''
 		for item in self.plot: 
-			fig = plt.figure(figsize=(15, 5))
+			fig = plt.figure(figsize=(15, 7))
 			title = item['title']
 			type = item['type']
 			y_axis = item['ylabel'] if 'ylabel' in item else None 
@@ -348,16 +348,16 @@ class Interface:
                                     label = ''
                                     for list_item in selector:
                                         label += val['selector'][list_item] + '\n'
-                                    label += val['jobid']
+                                    label += "Job ID: "+val['jobid']
                                 else :
-                                    label = val["jobid"]
+                                    label = "Job ID: "+val["jobid"]
                                 if os.path.isfile(path) and not self.jobStillRunning(key):
                                     with open(path, "r") as f:
                                         data = json.load(f)
                                     value = float(data[type])
                                     arch[label] = round(value, 2)
 
-			if len(arch) <= 9:
+			if len(arch) < 6:
 				rotation=0
 				align="center"
 			else:
@@ -369,12 +369,12 @@ class Interface:
 				# set offset
 				max_val = max(arch.values()) 
 				offset = max_val/100
-				plt.ylim(top=(max_val+10*offset))
+				plt.ylim(top=(max_val+20*offset))
 				for dev, val in arch.items():
 					y = val+offset
 					plt.text(diff, y, val, fontsize=14, multialignment="center",horizontalalignment="center", verticalalignment="bottom",  color='black')
 					diff += 1
-					plt.bar(dev, val, width=0.5, align='center', label = dev, color=clr)
+					plt.bar(dev, val, width=0.5, align='center', label=dev, color=clr)
 				imgdata = io.BytesIO()
 				plt.tight_layout()
 				fig.savefig(imgdata, format='png')
