@@ -19,7 +19,7 @@
 				"type" : "time",
 				"xlabel" : "",
 				"ylabel" : "",
-				"selector" : "Target node"
+				"selector" : ["Target node"]
 			}
 		]
 	},
@@ -187,7 +187,7 @@
 							"defines":
 							{
 								"ARCH": "iei-mustang-v100-mx8",
-								"TARGET": "MYRIAD",
+								"TARGET": "HDDL",
 								"FP_MODEL": "FP16"
 							}
 						},

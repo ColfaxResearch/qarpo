@@ -93,7 +93,7 @@ def main():
     input_blob = next(iter(net.inputs))
     out_blob = next(iter(net.outputs))
     net.batch_size = len(args.input)
-    job_id = os.environ['PBS_JOBID']
+    job_id = os.environ['PBS_JOBID'].split('.')[0]
 
     # Read and pre-process input images
     n, c, h, w = net.inputs[input_blob].shape
@@ -158,8 +158,8 @@ def main():
                 f.write(res + "\n Inference performed in " + str(avg_time) + "ms") 
 
     stats = {}
-    stats['time'] = str(t1)
-    stats['frame'] = str(args.number_iter*n)
+    stats['time'] = str(round(t1, 1))
+    stats['frames'] = str(args.number_iter*n)
     stats['fps'] = str(args.number_iter*n / t1)
     stats_file = result_dir+"/stats.json"
     with open(stats_file, 'w') as f:
