@@ -98,7 +98,7 @@ class DemoCatalog:
         w_hint = widgets.HTML(value=msgs['foreword'])
         w_refresh=widgets.Button(description=self.button)
         w_info=widgets.VBox([w_refresh, w_hint, w_url, w_time, w_git])
-        w_acc=widgets.Accordion(children=[w_info], selected_index=None)
+        w_acc=widgets.Accordion(children=[w_info], selected_index=0)
         w_acc.set_title(0, v)
         w_acc.add_class(c)
         display(w_acc)

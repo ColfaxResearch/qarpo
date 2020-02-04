@@ -357,7 +357,7 @@ class Interface:
                                     value = float(data[type])
                                     arch[label] = round(value, 2)
 
-			if len(arch) < 6:
+			if len(arch) < 5:
 				rotation=0
 				align="center"
 			else:
