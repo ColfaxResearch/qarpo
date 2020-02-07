@@ -11,16 +11,19 @@ class DemoCatalog:
         self.dir_path = dir_path
         self.messages = {
             "placeholder": "(waiting to check the status; click the Check Status button to check immediately)",
-	    "uptodate": "As of {time}, the catalog is up to date.",
-	    "behind": "As of {time}, the catalog requires an update.",
+	    "uptodate": "As of {time}, All Demos are up to date.",
+	    "behind": "As of {time}, Demos require an update.",
 	    "ahead": "As of {time}, it seems that you are doing your own version control.",
-	    "unable": "As of {time}, we are unable to determine the catalog status due to a server-side error.",
-	    "foreword": "Upon refresh, we will pull the latest examples from GitHub.<br /><b>After the refresh, you will lose any changes you have made to the demos and any data that your demo runs may have generated.</b><br/>",
+	    "unable": "As of {time}, we are unable to determine the demos status due to a server-side error.",
+	    "l_foreword": "Click the button below to pull the latest update for this demo from GitHub.",
+            "g_foreword": "<br /><b>After the refresh, you will lose any changes you have made to this demo/all demos and any data that your demo runs may have generated.</b><br/>",
+	
 	    "remote": "Remote URL",
 	    "lastCheck": "Server-side time of last status check",
 	    "gitsaid": "Output of 'git status'"
         }
-        self.button = "Refresh Catalog"
+        self.l_button = "Refresh This Demo Only"
+        self.g_button = "Refresh All Demos"
         self.reloadCode = "<script>window.location.reload()</script>"
         self.autorunFirstDelay = "1500"
         self.autorunInterval = "-1"
@@ -79,6 +82,9 @@ class DemoCatalog:
 
     def ShowRepositoryControls(self):
         url, status, lastCheck, fullstatus = self.GetStatus()
+        l_refresh=widgets.Button(description=self.l_button, layout=widgets.Layout(width='50%'))
+        g_refresh=widgets.Button(description=self.g_button, layout=widgets.Layout(width='50%'))
+
         msgs = self.messages
         if int(status) == 0:
             c = 'uptodate'
@@ -95,16 +101,18 @@ class DemoCatalog:
         w_url = widgets.HTML(value=("{remote}: {remote_url}").format(remote=msgs['remote'], remote_url=url))
         w_time = widgets.HTML(value=("{time}: {lastCheck}").format(time=msgs['lastCheck'], lastCheck=lastCheck))
         w_git = widgets.HTML(value=("{gitsaid}: {gitline}").format(gitsaid=msgs['gitsaid'], gitline=fullstatus))
-        w_hint = widgets.HTML(value=msgs['foreword'])
-        w_refresh=widgets.Button(description=self.button)
-        w_info=widgets.VBox([w_refresh, w_hint, w_url, w_time, w_git])
+        w_l_hint = widgets.HTML(value=msgs['l_foreword'])
+        w_g_hint = widgets.HTML(value=msgs['g_foreword'])
+        w_info=widgets.VBox([l_refresh, g_refresh, w_g_hint, w_url, w_time, w_git])
         w_acc=widgets.Accordion(children=[w_info], selected_index=0)
         w_acc.set_title(0, v)
         w_acc.add_class(c)
         display(w_acc)
         
-        self.refreshButton = w_refresh
-        self.refreshButton.on_click(self.RefreshRepository)
+        self.localRefreshButton = l_refresh
+        self.globalRefreshButton = g_refresh
+        self.localRefreshButton.on_click(self.RefreshRepository)
+        self.globalRefreshButton.on_click(self.RefreshRepository)
 
 
     def GetStatus(self):
@@ -129,8 +137,13 @@ class DemoCatalog:
 
 
     def RefreshRepository(self, evt):
-        self.refreshButton.disabled = True
-        cmd = 'git clean -f -d ; git checkout origin/master -- {}'.format(self.dir_path)
+        if evt.description == self.l_button:
+            cmd = 'git clean -f -d ; git checkout origin/master -- {}'.format(self.dir_path)
+            #self.localRefreshButton.disabled = True
+        else:
+            cmd = 'git clean -f -d ; git reset --hard origin/master'
+            #cmd = 'git clean -f -d ; git checkout -- ./ ; git pull'
+            #self.globalRefreshButton.disabled = True
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
         output,_ = p.communicate()
         display(HTML(self.reloadCode))
