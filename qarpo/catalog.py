@@ -84,6 +84,10 @@ class DemoCatalog:
         url, status, lastCheck, fullstatus = self.GetStatus()
         l_refresh=widgets.Button(description=self.l_button, layout=widgets.Layout(width='50%'))
         g_refresh=widgets.Button(description=self.g_button, layout=widgets.Layout(width='50%'))
+        self.localRefreshButton = l_refresh
+        self.globalRefreshButton = g_refresh
+        self.localRefreshButton.on_click(self.RefreshRepository)
+        self.globalRefreshButton.on_click(self.RefreshRepository)
 
         msgs = self.messages
         if int(status) == 0:
@@ -109,12 +113,7 @@ class DemoCatalog:
         w_acc.add_class(c)
         display(w_acc)
         
-        self.localRefreshButton = l_refresh
-        self.globalRefreshButton = g_refresh
-        self.localRefreshButton.on_click(self.RefreshRepository)
-        self.globalRefreshButton.on_click(self.RefreshRepository)
-
-
+        
     def GetStatus(self):
         cmd = 'git config --get remote.origin.url; git fetch origin'
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
