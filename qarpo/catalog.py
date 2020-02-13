@@ -26,7 +26,6 @@ class DemoCatalog:
 	    "gitsaid": "Output of 'git status'"
         }
         self.l_button = "Update this {}".format(self.NB_type)
-        #self.g_button = "Update all {}s".format(self.NB_type)
         self.g_button = "Update all Demos and Tutorials"
         self.reloadCode = "<script>window.location.reload()</script>"
         self.autorunFirstDelay = "1500"
@@ -111,8 +110,6 @@ class DemoCatalog:
 
         if local_status == 0:
             c_l = 'local_uptodate'
-            #self.localRefreshButton.disabled = True
-            #self.localRefreshButton.description= "This Demo is uptodate"
             l_refresh = widgets.HTML(value=msgs['local_uptodate'].format(NB_type=self.NB_type))
         elif local_status == 1:
             c_l = 'local_not_updated'
