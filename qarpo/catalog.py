@@ -7,23 +7,27 @@ import datetime
 
 class DemoCatalog:
 
-    def __init__(self, dir_path):
+    def __init__(self, dir_path, NB_type, branch='master'):
         self.dir_path = dir_path
+        self.NB_type = NB_type
+        self.branch = branch
         self.messages = {
             "placeholder": "(waiting to check the status; click the Check Status button to check immediately)",
-	    "uptodate": "As of {time}, All Demos are up to date.",
-	    "behind": "As of {time}, Demos require an update.",
+	    "uptodate": "As of {time}, All {NB_type}s are up to date.",
+	    "behind": "As of {time}, {NB_type}s require an update.",
 	    "ahead": "As of {time}, it seems that you are doing your own version control.",
-	    "unable": "As of {time}, we are unable to determine the demos status due to a server-side error.",
-	    "l_foreword": "Click the button below to pull the latest update for this demo from GitHub.",
-            "g_foreword": "<br /><b>After the refresh, you will lose any changes you have made to this demo/all demos and any data that your demo runs may have generated.</b><br/>",
+	    "unable": "As of {time}, we are unable to determine the {NB_type}s status due to a server-side error.",
+            "g_foreword": "<br /><b>After the refresh, you will lose any changes you have made to this {NB_type}/all {NB_type}s and any data that your {NB_type} runs may have generated.</b><br/>",
+            "local_uptodate": "This {NB_type} is up to date.",
+            "global_uptodate": "All {NB_type}s are up to date.",
 	
 	    "remote": "Remote URL",
 	    "lastCheck": "Server-side time of last status check",
 	    "gitsaid": "Output of 'git status'"
         }
-        self.l_button = "Refresh This Demo Only"
-        self.g_button = "Refresh All Demos"
+        self.l_button = "Update this {}".format(self.NB_type)
+        #self.g_button = "Update all {}s".format(self.NB_type)
+        self.g_button = "Update all Demos and Tutorials"
         self.reloadCode = "<script>window.location.reload()</script>"
         self.autorunFirstDelay = "1500"
         self.autorunInterval = "-1"
@@ -81,32 +85,42 @@ class DemoCatalog:
 
 
     def ShowRepositoryControls(self):
-        url, status, lastCheck, fullstatus = self.GetStatus()
+        url, status, lastCheck, fullstatus, local_status = self.GetStatus()
+        msgs = self.messages
         l_refresh=widgets.Button(description=self.l_button, layout=widgets.Layout(width='50%'))
         g_refresh=widgets.Button(description=self.g_button, layout=widgets.Layout(width='50%'))
         self.localRefreshButton = l_refresh
         self.globalRefreshButton = g_refresh
         self.localRefreshButton.on_click(self.RefreshRepository)
         self.globalRefreshButton.on_click(self.RefreshRepository)
+        w_url = widgets.HTML(value=("{remote}: {remote_url}").format(remote=msgs['remote'], remote_url=url))
+        w_time = widgets.HTML(value=("{time}: {lastCheck}").format(time=msgs['lastCheck'], lastCheck=lastCheck))
+        w_git = widgets.HTML(value=("{gitsaid}: {gitline}").format(gitsaid=msgs['gitsaid'], gitline=fullstatus))
+        w_g_hint = widgets.HTML(value=msgs['g_foreword'].format(NB_type=self.NB_type))
 
-        msgs = self.messages
         if int(status) == 0:
             c = 'uptodate'
+            g_refresh = widgets.HTML(value=msgs['global_uptodate'].format(NB_type=self.NB_type))
+            w_g_hint = widgets.HTML(value="")
         elif int(status) == 1:
             c = 'behind'
         elif int(status) == 2:
             c = 'ahead'
         else:
             c = 'unable'
-        v = msgs[c].format(time=lastCheck)
+
+        if local_status == 0:
+            c_l = 'local_uptodate'
+            #self.localRefreshButton.disabled = True
+            #self.localRefreshButton.description= "This Demo is uptodate"
+            l_refresh = widgets.HTML(value=msgs['local_uptodate'].format(NB_type=self.NB_type))
+        elif local_status == 1:
+            c_l = 'local_not_updated'
+
+        v = msgs[c].format(time=lastCheck, NB_type=self.NB_type)
 
         display(HTML(self.css))
 
-        w_url = widgets.HTML(value=("{remote}: {remote_url}").format(remote=msgs['remote'], remote_url=url))
-        w_time = widgets.HTML(value=("{time}: {lastCheck}").format(time=msgs['lastCheck'], lastCheck=lastCheck))
-        w_git = widgets.HTML(value=("{gitsaid}: {gitline}").format(gitsaid=msgs['gitsaid'], gitline=fullstatus))
-        w_l_hint = widgets.HTML(value=msgs['l_foreword'])
-        w_g_hint = widgets.HTML(value=msgs['g_foreword'])
         w_info=widgets.VBox([l_refresh, g_refresh, w_g_hint, w_url, w_time, w_git])
         w_acc=widgets.Accordion(children=[w_info], selected_index=0)
         w_acc.set_title(0, v)
@@ -132,17 +146,28 @@ class DemoCatalog:
         else:
             status = 3
         time = datetime.datetime.now().strftime("%d/%m/%y %H:%M:%S")
-        return url, status, time, fullstatus
+        if status != 0:
+            local_status = self.GetLocalStatus()
+        else:
+            local_status = 0
+        return url, status, time, fullstatus, local_status
 
+    def GetLocalStatus(self):
+        cmd = 'git diff origin/{B} --name-only {P}'.format(B=self.branch, P=self.dir_path)
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
+        output, _ = p.communicate()
+        local_status = output.decode()
+        if not local_status:
+            return 0
+        else:
+            return 1
 
     def RefreshRepository(self, evt):
         if evt.description == self.l_button:
-            cmd = 'git clean -f -d ; git checkout origin/master -- {}'.format(self.dir_path)
-            #self.localRefreshButton.disabled = True
+            cmd = 'git clean -f -d ; git checkout origin/{B} -- {P}'.format(B=self.branch, P=self.dir_path)
         else:
-            cmd = 'git clean -f -d ; git reset --hard origin/master'
-            #cmd = 'git clean -f -d ; git checkout -- ./ ; git pull'
-            #self.globalRefreshButton.disabled = True
+            #cmd = 'git clean -f -d ; git reset --hard origin/master'
+            cmd = 'git clean -f -d ; git checkout -- ./ ; git pull'
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
         output,_ = p.communicate()
         display(HTML(self.reloadCode))
