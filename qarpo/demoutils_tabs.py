@@ -222,7 +222,7 @@ class Interface:
 				p = subprocess.Popen([cmd], stdout=subprocess.PIPE, shell=True)
 				output,_ = p.communicate()
 				stat = output.decode("utf-8").rsplit()
-				running = True if stat[4]=='R' else False
+				running = True if 'R' in stat else False
  
 			self.tab.set_title(str(frame_id), 'Running: {jobid}'.format(jobid=jobid))
 			for output_file in progress_info: 
