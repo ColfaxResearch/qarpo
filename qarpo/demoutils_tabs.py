@@ -9,7 +9,7 @@ import subprocess
 import datetime
 import matplotlib
 import matplotlib.pyplot as plt
-import os 
+import os, pwd 
 import warnings
 import json
 import random
@@ -265,6 +265,9 @@ class Interface:
 			op_display_button.disabled=False
 			def wrapHTML(event):
 				op_display.value = self.outputHTML(path)
+				print(type(op_display))
+				print("op_display")
+                                
 
 			op_display_button.on_click(wrapHTML)
 
@@ -287,9 +290,10 @@ class Interface:
 		'''
 		op_list = []
 		stats = result_path+'/stats.json'
+		op_path = '/user/{user_id}/files/{wd_path}/{rd_path}'.format(user_id=pwd.getpwuid(os.getuid()).pw_name, wd_path=os.getcwd().split('/', 3)[3], rd_path=result_path)
 		for file_ in os.listdir(result_path):
 			if file_.endswith(self.output_type):
-				op_list.append(result_path+'/'+file_)
+				op_list.append(op_path+'/'+file_)
 		if os.path.isfile(stats):
 			with open(stats) as f:
 				data = json.load(f)
