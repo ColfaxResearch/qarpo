@@ -265,9 +265,6 @@ class Interface:
 			op_display_button.disabled=False
 			def wrapHTML(event):
 				op_display.value = self.outputHTML(path)
-				print(type(op_display))
-				print("op_display")
-                                
 
 			op_display_button.on_click(wrapHTML)
 
