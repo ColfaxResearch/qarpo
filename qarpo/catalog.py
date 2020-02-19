@@ -7,7 +7,7 @@ import datetime
 
 class DemoCatalog:
 
-    def __init__(self, dir_path, NB_type='Repository', branch='master'):
+    def __init__(self, dir_path, NB_type='Notebook', branch='master'):
         self.dir_path = dir_path
         self.NB_type = NB_type
         self.branch = branch
