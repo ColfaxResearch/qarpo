@@ -287,10 +287,9 @@ class Interface:
 		'''
 		op_list = []
 		stats = result_path+'/stats.json'
-		op_path = '/user/{user_id}/files/{wd_path}/{rd_path}'.format(user_id=pwd.getpwuid(os.getuid()).pw_name, wd_path=os.getcwd().split('/', 3)[3], rd_path=result_path)
 		for file_ in os.listdir(result_path):
 			if file_.endswith(self.output_type):
-				op_list.append(op_path+'/'+file_)
+				op_list.append(file_)
 		if os.path.isfile(stats):
 			with open(stats) as f:
 				data = json.load(f)
@@ -303,13 +302,16 @@ class Interface:
 		height = '480' if len(op_list) == 1 else '240'
 		if self.output_type == ".mp4":
 			for x in op_list:
-				string += "<video alt=\"\" controls autoplay height=\"{height}\"><source src=\"{op}\" type=\"video/mp4\" /></video>".format(op=x, height=height)
+				op_vid = '/user/{user_id}/files/{wd_path}/{rd_path}/{file_}'.format(user_id=pwd.getpwuid(os.getuid()).pw_name, wd_path=os.getcwd().split('/', 3)[3], rd_path=result_path, file_=x)
+				string += "<video alt=\"\" controls autoplay height=\"{height}\"><source src=\"{op}\" type=\"video/mp4\" /></video>".format(op=op_vid, height=height)
 		elif self.output_type == ".png":
 			for x in op_list:
-				string += "<img src='{img}' width='783' height='{height}'>".format(img=x, height=height)
+				op_img = '/user/{user_id}/files/{wd_path}/{rd_path}/{file_}'.format(user_id=pwd.getpwuid(os.getuid()).pw_name, wd_path=os.getcwd().split('/', 3)[3], rd_path=result_path, file_=x)
+				string += "<img src='{img}' width='783' height='{height}'>".format(img=op_img, height=height)
 		elif self.output_type == ".txt":
 			for x in op_list:
-				with open(x, 'r') as f:
+				op_txt = os.path.join(result_path, x)
+				with open(op_txt, 'r') as f:
 					string += str(f.readlines())
 
 		return '''<h2></h2>
