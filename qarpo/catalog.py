@@ -164,7 +164,7 @@ class DemoCatalog:
             cmd = 'git clean -f -d ; git checkout origin/{B} -- {P}'.format(B=self.branch, P=self.dir_path)
         else:
             #cmd = 'git clean -f -d ; git reset --hard origin/master'
-            cmd = 'git clean -f -d ; git checkout -- ./ ; git pull'
+            cmd = 'git reset HEAD; git clean -f -d ; git checkout -- ./ ; git pull'
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
         output,_ = p.communicate()
         display(HTML(self.reloadCode))
