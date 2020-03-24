@@ -72,7 +72,7 @@ def outputHTML(title, result_path, output_type, stats=None):
 
 
 
-def summaryPlot(results_list, x_axis, y_axis, title, plot):
+def summaryPlot(results_list, x_axis, y_axis, title, plot, colors=None):
     ''' Bar plot input:
 	results_dict: dictionary of path to result file and label {path_to_result:label}
 	x_axis: label of the x axis
@@ -84,7 +84,9 @@ def summaryPlot(results_list, x_axis, y_axis, title, plot):
         clr = 'xkcd:blue'
     else:
         clr = 'xkcd:azure'
-
+    if colors is not None:
+        clr = colors
+        
     plt.figure(figsize=(15, 8))
     plt.title(title , fontsize=28, color='black', fontweight='bold')
     plt.ylabel(y_axis, fontsize=16, color=clr)

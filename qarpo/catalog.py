@@ -118,7 +118,8 @@ class DemoCatalog:
 
         display(HTML(self.css))
 
-        w_info=widgets.VBox([l_refresh, g_refresh, w_g_hint, w_url, w_time, w_git])
+        #w_info=widgets.VBox([l_refresh, g_refresh, w_g_hint, w_url, w_time, w_git])
+        w_info=widgets.VBox([l_refresh, g_refresh, w_g_hint, w_time, w_git])
         w_acc=widgets.Accordion(children=[w_info], selected_index=0)
         w_acc.set_title(0, v)
         w_acc.add_class(c)
