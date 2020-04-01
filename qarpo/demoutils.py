@@ -10,6 +10,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import os 
 import warnings
+from .disclaimer import *
 
 def videoHTML(title, videos_list, stats=None):
     '''
@@ -72,7 +73,7 @@ def outputHTML(title, result_path, output_type, stats=None):
 
 
 
-def summaryPlot(results_list, x_axis, y_axis, title, plot, colors=None):
+def summaryPlot(results_list, x_axis, y_axis, title, plot, colors=None, disclaimer=None):
     ''' Bar plot input:
 	results_dict: dictionary of path to result file and label {path_to_result:label}
 	x_axis: label of the x axis
@@ -86,7 +87,11 @@ def summaryPlot(results_list, x_axis, y_axis, title, plot, colors=None):
         clr = 'xkcd:azure'
     if colors is not None:
         clr = colors
-        
+    # If the disclaimer is not specified, it defaults to None
+    # and then replaced with the default text below:
+    if disclaimer is None:
+        disclaimer=defaultDisclaimer()
+
     plt.figure(figsize=(15, 8))
     plt.title(title , fontsize=28, color='black', fontweight='bold')
     plt.ylabel(y_axis, fontsize=16, color=clr)
@@ -127,6 +132,10 @@ def summaryPlot(results_list, x_axis, y_axis, title, plot, colors=None):
         diff += 1
     plt.ylim(top=(max(val)+10*offset))
     plt.bar(arch, val, width=0.8, align='center', color=clr)
+    plt.pause(1)
+    # to disable the disclaimer display, supply "disclaimer=False" argument
+    if disclaimer:
+        display(widgets.HTML(value=disclaimer))
 
 
 def liveQstat():

@@ -16,6 +16,7 @@ import random
 import io
 import urllib, base64
 import urllib.parse
+from .disclaimer import *
 
 def progressUpdate(file_name, time_diff, frame_count, video_len):
         progress = round(100*(frame_count/video_len), 1)
@@ -30,6 +31,8 @@ class Interface:
 
 	def __init__(self, config):
 		container_list = []
+		# to disable the disclaimer display, set disclaimer=""
+		self.disclaimer = config["disclaimer"] if "disclaimer" in config else defaultDisclaimer()
 		self.command = config["job"]["command"] if "command" in config["job"] else ""
 		self.output_type = config["job"]["output_type"]
 		self.results_path = config["job"]["results_path"]
@@ -41,7 +44,8 @@ class Interface:
 			self.plot = config["job"]["plots"]
 			self.plot_button = widgets.Button(description='Plot results' , disabled=True, button_style='info')
 			self.plot_img = widgets.HTML('')
-			container_list = [self.plot_button, self.plot_img]
+			self.plot_disclaimer = widgets.HTML(self.disclaimer)
+			container_list = [self.plot_button, self.plot_img, self.plot_disclaimer]
 		else:
 			self.plot = None
 		self.status = widgets.HTML("No jobs submitted yet")
