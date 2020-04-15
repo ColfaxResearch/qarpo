@@ -118,6 +118,7 @@ class Interface:
 			self.status.value = "<span style='color:green'>&#10004;</span> Job submitted, job ID: {jobid}".format(jobid=jobid)
 		else:
 			self.status.value = "<span style='color:red'>&#9888;</span> Job submission failed"
+			del self.jobDict[command]
 			return
 
 		self.jobDict[command]['jobid'] = jobid 
