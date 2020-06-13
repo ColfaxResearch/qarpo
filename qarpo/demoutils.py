@@ -153,7 +153,7 @@ def liveQstat():
             output,_ = p.communicate()
             now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             qstat.append_stdout(now+'\n\n'+output.decode()+'\n\n\n')
-            time.sleep(3.0)
+            time.sleep(10.0)
             qstat.clear_output(wait=False)
         print('liveQstat stopped')
     thread = threading.Thread(target=_work, args=(qstat, stop_signal_q))
