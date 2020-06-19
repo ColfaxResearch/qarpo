@@ -255,10 +255,14 @@ def simpleProgressUpdate(file_name, current_time, estimated_time):
 
 
 def progressUpdate(file_name, time_diff, frame_count, video_len):
-    progress = round(100*(frame_count/video_len), 1)
-    remaining_time = round((time_diff/frame_count)*(video_len-frame_count), 1)
-    estimated_time = round((time_diff/frame_count)*video_len, 1)
-    with  open(file_name, "w") as progress_file:
-        progress_file.write(str(progress)+'\n')
-        progress_file.write(str(remaining_time)+'\n')
-        progress_file.write(str(estimated_time)+'\n')
+    def _write_to_file(file_name, time_diff, frame_count, video_len):
+        progress = round(100*(frame_count/video_len), 1)
+        remaining_time = round((time_diff/frame_count)*(video_len-frame_count), 1)
+        estimated_time = round((time_diff/frame_count)*video_len, 1)
+        with  open(file_name, "w") as progress_file:
+            progress_file.write(str(progress)+'\n')
+            progress_file.write(str(remaining_time)+'\n')
+            progress_file.write(str(estimated_time)+'\n')
+    
+    thread = threading.Thread(target=_write_to_file, args=(file_name, time_diff, frame_count, video_len))
+    thread.start()
