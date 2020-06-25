@@ -263,7 +263,7 @@ class Interface:
 				id_ += 3
 
 			while self.jobStillRunning(command):
-				time.sleep(0.1) 
+				time.sleep(3) 
 			if self.plot:
 				self.plot_button.disabled=False
 			self.tab.set_title(str(frame_id), 'Done: {jobid}'.format(jobid=jobid))
