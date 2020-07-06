@@ -11,6 +11,8 @@ import matplotlib.pyplot as plt
 import os 
 import warnings
 from .disclaimer import *
+#Global variable PROG_START
+PROG_START = 0
 
 def videoHTML(title, videos_list, stats=None):
     '''
@@ -253,18 +255,71 @@ def simpleProgressUpdate(file_name, current_time, estimated_time):
         progress_file.write(str(remaining_time)+'\n')
         progress_file.write(str(estimated_time)+'\n')
 
-def progressUpdate(file_name, time_diff, frame_count, video_len, freq):
-    def _write_to_file(file_name, time_diff, frame_count, video_len):
-        while True:
-            progress = round(100*(frame_count[0]/video_len), 1)
-            remaining_time = round((time_diff[0]/frame_count[0])*(video_len-frame_count[0]), 1)
-            estimated_time = round((time_diff[0]/frame_count[0])*video_len, 1)
-            with  open(file_name, "w+") as progress_file:
-                progress_file.write(str(progress)+'\n')
-                progress_file.write(str(remaining_time)+'\n')
-                progress_file.write(str(estimated_time)+'\n')
-            if frame_count[0] >= video_len:
-                break
-            time.sleep(freq)
-    thread = threading.Thread(target=_write_to_file, args=(file_name, time_diff, frame_count, video_len))
-    thread.start()
+
+class ProgressUpdate:
+
+    def __init__(self):
+        self.progress_data = []
+        self.latest_update = []
+        self.main_thread = threading.current_thread()
+        def _writeToFile(progress, latest_update):
+            more_data = True
+            while more_data:
+                for  id_, (new_data, latest) in enumerate(zip(self.progress_data, self.latest_update)):
+                    if not self.main_thread.is_alive():
+                        more_data = False
+                    file_name, time_diff, frame_count, video_len = new_data
+                    file_name, last_c = latest
+                    if last_c == frame_count:
+                        continue
+                    else:
+                        self.latest_update[id_] = [file_name, frame_count]
+                        progress = round(100*(frame_count/video_len), 1)
+                        remaining_time = round((time_diff/frame_count)*(video_len-frame_count), 1)
+                        estimated_time = round((time_diff/frame_count)*video_len, 1)
+                        with  open(file_name, "w+") as progress_file:
+                            progress_file.write(str(progress)+'\n')
+                            progress_file.write(str(remaining_time)+'\n')
+                            progress_file.write(str(estimated_time)+'\n')
+                time.sleep(1)
+               
+
+        self.thread = threading.Thread(target=_writeToFile, args=(self.progress_data, self.latest_update))
+        if not self.thread.is_alive():
+            self.thread.start()
+
+
+    def progress(self, file_name, time_diff, frame_count, video_len):
+        for id_, item in enumerate(self.progress_data):
+            file_, _, _, _ = item
+            if file_name == file_:
+                self.progress_data[id_] = [file_name, time_diff, frame_count, video_len]
+                return
+        self.progress_data.append([file_name, time_diff, frame_count, video_len])
+        self.latest_update.append([file_name, -1])
+        
+ 
+
+def progressUpdate(file_name, time_diff, frame_count, video_len):
+    global PROG_START
+    if not isinstance(PROG_START, ProgressUpdate):
+        print("Create progress tracker")
+        PROG_START = ProgressUpdate()
+    PROG_START.progress(file_name, time_diff, frame_count, video_len)
+
+
+#def progressUpdate(file_name, time_diff, frame_count, video_len, freq):
+#    def _write_to_file(file_name, time_diff, frame_count, video_len):
+#        while True:
+#            progress = round(100*(frame_count[0]/video_len), 1)
+#            remaining_time = round((time_diff[0]/frame_count[0])*(video_len-frame_count[0]), 1)
+#            estimated_time = round((time_diff[0]/frame_count[0])*video_len, 1)
+#            with  open(file_name, "w+") as progress_file:
+#                progress_file.write(str(progress)+'\n')
+#                progress_file.write(str(remaining_time)+'\n')
+#                progress_file.write(str(estimated_time)+'\n')
+#            if frame_count[0] >= video_len:
+#                break
+#            time.sleep(freq)
+#    thread = threading.Thread(target=_write_to_file, args=(file_name, time_diff, frame_count, video_len))
+#    thread.start()
