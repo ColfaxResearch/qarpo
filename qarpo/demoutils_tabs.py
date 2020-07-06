@@ -70,7 +70,7 @@ class Interface:
 					list_ = []
 					for x in val['options']:
 						list_.append(x['name'])
-					widget = widgets.Select(options=list_, description='', disabled=False, rows=len(list_), layout = Layout(width='fixed'))
+					widget = widgets.Select(options=list_, description='', disabled=False, rows=len(list_), layout = Layout(width='auto'))
 					dict_["options"] = val["options"]
 				elif val['type'] == "text":
 					widget = widgets.Text(value=val['default'], description="", layout = Layout(width='100%'), disabled=False)
