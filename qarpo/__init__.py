@@ -1,5 +1,4 @@
-from .demoutils_tabs import Interface
-from .demoutils_tabs import progressUpdate
+from .demoutils_tabs import *
 from .demoutils import *
 from .catalog import DemoCatalog
 
