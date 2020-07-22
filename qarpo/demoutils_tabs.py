@@ -169,16 +169,17 @@ class Interface:
         op_cmd = [f'qpeek {job_id}']
 
         def _work(output_widget, op_cmd, command):
-            while self.jobStillRunning(command):
+            while command in self.jobDict and self.jobStillRunning(command):
                 p = subprocess.Popen(op_cmd, stdout=subprocess.PIPE, shell=True)
                 output,_ = p.communicate()
                 if output != b'':
                     output_widget.value=''' {new_op} '''.format(new_op = output.decode().replace('\n', '<br>'))
                 time.sleep(5.0)
-            while not  os.path.exists(f"{self.jobDict[command]['output_path']}/stdout"):
+            while command in self.jobDict and not  os.path.exists(f"{self.jobDict[command]['output_path']}/stdout"):
                 time.sleep(1.0)
-            with open (f"{self.jobDict[command]['output_path']}/stdout", "r") as f:
-                output_widget.value=''' {new_op} '''.format(new_op = f.read().replace('\n', '<br>'))
+            if command in self.jobDict:
+                with open (f"{self.jobDict[command]['output_path']}/stdout", "r") as f:
+                    output_widget.value=''' {new_op} '''.format(new_op = f.read().replace('\n', '<br>'))
 
         thread = threading.Thread(target=_work, args=(output_widget, op_cmd, command))
         thread.start()
@@ -215,12 +216,20 @@ class Interface:
             table += '''<tr><td>Submission command</td><td>{command}</td></tr>'''.format(command=command)
             table += '''</tbody></table>'''
             title = widgets.HTML(value = '''{table}'''.format(table=table))
+            op_monitor = widgets.HTML(value='', layout={'width': '100%', 'height': 'auto', 'border': '1px solid gray'})
             op_display_button = widgets.Button(description='Display output', disabled=True, button_style='info')
             op_display = widgets.HTML(value='')
-            op_monitor = widgets.HTML(value='', layout={'width': '100%', 'height': 'auto', 'border': '1px solid gray'})
+            #Cancel job button and function on click
+            cancel_job_button = widgets.Button(description='Cancel job', disabled=False, button_style='info')
+            def cancelJobWrap(event):
+                self.cancelJob(command)
+                cancel_job_button.disabled=True
+
+
+            cancel_job_button.on_click(cancelJobWrap)
             if self.output_type == "live":
                 self.liveOutputMonitor(jobid, op_monitor, command)
-                op_list = [op_monitor]
+                op_list = [cancel_job_button, op_monitor]
             else:
                 op_list = [op_display_button, op_display]
             
@@ -287,12 +296,13 @@ class Interface:
                 os.remove(output_file)
                 id_ += 3
 
-            while self.jobStillRunning(command):
+            while command in self.jobDict and  self.jobStillRunning(command):
                 time.sleep(3) 
             if self.plot:
                 self.plot_button.disabled=False
             self.tab.set_title(str(frame_id), 'Done: {jobid}'.format(jobid=jobid))
             op_display_button.disabled=False
+            cancel_job_button.disabled=True
             def wrapHTML(event):
                 op_display.value = self.outputHTML(path)
 
@@ -301,6 +311,17 @@ class Interface:
         thread = threading.Thread(target=_work, args=())
         thread.start()
         time.sleep(0.1)
+
+    def cancelJob(self, command):
+        if self.jobStillRunning(command):
+            cmd = 'qdel '+self.jobDict[command]['jobid']
+            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
+         
+        frame_id = self.jobDict[command]['box_id']
+        self.tab.set_title(str(frame_id), f'Done: {self.jobDict[command]["jobid"]}')
+        return
+
+
 
     def jobStillRunning (self, command):
         ''' Input: command
