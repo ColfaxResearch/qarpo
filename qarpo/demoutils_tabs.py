@@ -217,14 +217,14 @@ class Interface:
             while command in self.jobDict and self.jobStillRunning(command):
                 p = subprocess.Popen(op_cmd, stdout=subprocess.PIPE, shell=True)
                 output,_ = p.communicate()
-                if output != b'':
-                    output_widget.value=''' {new_op} '''.format(new_op = output.decode().replace('\n', '<br>'))
-                time.sleep(5.0)
-            while command in self.jobDict and not  os.path.exists(f"{self.jobDict[command]['output_path']}/stdout"):
-                time.sleep(1.0)
-            if command in self.jobDict:
-                with open (f"{self.jobDict[command]['output_path']}/stdout", "r") as f:
-                    output_widget.value=''' {new_op} '''.format(new_op = f.read().replace('\n', '<br>'))
+                output_widget.clear_output(wait=False)
+                output_widget.append_stdout("{}".format(output.decode()))
+                time.sleep(7.0)
+            while not os.path.exists(f"{self.jobDict[command]['output_path']}/stdout"):
+                time.sleep(3.0)
+            with open (f"{self.jobDict[command]['output_path']}/stdout", "r") as f:
+                output_widget.clear_output(wait=False)
+                output_widget.append_stdout("{}".format(f.read()))
 
         thread = threading.Thread(target=_work, args=(output_widget, op_cmd, command))
         thread.start()
@@ -261,7 +261,8 @@ class Interface:
             table += '''<tr><td>Submission command</td><td>{command}</td></tr>'''.format(command=command)
             table += '''</tbody></table>'''
             title = widgets.HTML(value = '''{table}'''.format(table=table))
-            op_monitor = widgets.HTML(value='', layout={'width': '100%', 'height': 'auto', 'border': '1px solid gray'})
+
+            op_monitor = widgets.Output(layout={'width': '100%', 'height': 'auto', 'border': '1px solid gray'})
             op_display_button = widgets.Button(description='Display output', disabled=True, button_style='info')
             op_display = widgets.HTML(value='')
             #Cancel job button and function on click
@@ -269,7 +270,6 @@ class Interface:
             def cancelJobWrap(event):
                 self.cancelJob(command)
                 cancel_job_button.disabled=True
-
 
             cancel_job_button.on_click(cancelJobWrap)
             if self.output_type == "live":
@@ -292,7 +292,6 @@ class Interface:
             else:
                 frame_id = self.jobDict[command]['box_id']
                 frame = self.tab.children[frame_id]
-                #output.value = ""
                 op_display_button.disabled=True
                 frame.children = widget_list
                 self.tab.set_title(str(frame_id), '{jobid}'.format(jobid=jobid))
