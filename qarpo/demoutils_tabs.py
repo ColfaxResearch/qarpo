@@ -17,6 +17,7 @@ import io
 import urllib, base64
 import urllib.parse
 from .disclaimer import *
+
 #Global variable PROG_START
 PROG_START = 0
 
@@ -85,6 +86,7 @@ class Interface:
             self.results_defines = config["job"]["results_defines"]
             self.command = self.command.replace(self.results_defines, self.results_path)
         self.progress_list = config["job"]["progress_indicators"] if "progress_indicators" in config["job"] else None
+        self.control_widgets = config["job"]["control_widgets"] if "control_widgets" in config["job"] else []
         if "plots" in config["job"]:
             self.plot = config["job"]["plots"]
             self.plot_button = widgets.Button(description='Plot results' , disabled=True, button_style='info')
@@ -264,21 +266,19 @@ class Interface:
             op_monitor = widgets.HTML(value='', layout={'width': '100%', 'height': 'auto', 'border': '1px solid gray'})
             op_display_button = widgets.Button(description='Display output', disabled=True, button_style='info')
             op_display = widgets.HTML(value='')
-            #Cancel job button and function on click
-            cancel_job_button = widgets.Button(description='Cancel job', disabled=False, button_style='info')
-            def cancelJobWrap(event):
-                self.cancelJob(command)
-                cancel_job_button.disabled=True
+            control_widgets = []
+            from .control_widgets import ControlWidget
+            for item in self.control_widgets:
+                wid = ControlWidget(item, self.jobDict, self, command).button
+                control_widgets.append(wid)
 
-
-            cancel_job_button.on_click(cancelJobWrap)
             if self.output_type == "live":
                 self.liveOutputMonitor(jobid, op_monitor, command)
-                op_list = [cancel_job_button, op_monitor]
+                op_list = [op_monitor]
             else:
                 op_list = [op_display_button, op_display]
             
-            widget_list = [title]+progress_wid+op_list
+            widget_list = [title]+progress_wid+op_list+control_widgets
 
             if self.jobDict[command]['box_id'] == None:
                 frame = widgets.HBox(widget_list, layout=frame_layout)
@@ -347,7 +347,6 @@ class Interface:
                 self.plot_button.disabled=False
             self.tab.set_title(str(frame_id), 'Done: {jobid}'.format(jobid=jobid))
             op_display_button.disabled=False
-            cancel_job_button.disabled=True
             def wrapHTML(event):
                 op_display.value = self.outputHTML(path)
 
@@ -356,16 +355,6 @@ class Interface:
         thread = threading.Thread(target=_work, args=())
         thread.start()
         time.sleep(0.1)
-
-    def cancelJob(self, command):
-        if self.jobStillRunning(command):
-            cmd = 'qdel '+self.jobDict[command]['jobid']
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
-         
-        frame_id = self.jobDict[command]['box_id']
-        self.tab.set_title(str(frame_id), f'Done: {self.jobDict[command]["jobid"]}')
-        return
-
 
 
     def jobStillRunning (self, command):
