@@ -43,8 +43,9 @@ loader = '''<!DOCTYPE html>
 
 
 class DashboardLauncher():
-    def __init__(self, command):
+    def __init__(self, command, search_url):
         self.command = command
+        self.pointer = search_url
         self.start_button = widgets.Button(description='Launch Dashboard', disabled=False, button_style='info')
         self.stop_button = widgets.Button(description='Stop Dashboard', disabled=False, button_style='info')
         self.loader = widgets.HTML(value='')
@@ -84,7 +85,7 @@ class DashboardLauncher():
                 output,_ = p.communicate()
                 output = output.decode().split('\n')
                 time.sleep(3.0)
-                str_ = "https://dl-workbench"
+                str_ = self.pointer
                 for x in output:
                     if str_ in x:
                         url_detected = True
