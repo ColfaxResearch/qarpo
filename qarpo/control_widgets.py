@@ -52,24 +52,28 @@ class ControlWidget(Interface):
     
         
     
-    #def addTelemetryButton(self):
-    #    telemetry_button = widgets.Button(description='Telemetry', disabled=False, button_style='info')
-    #    telemetry_URL = widgets.HTML("")
-    #    telemetry_box = widgets.HBox([telemetry_button, telemetry_URL])
-    #    def _work():
-    #        def displayTelemetry(event):
-    #            result_file = "https://devcloud.intel.com/edge/metrics/d/"+self.jobDict[self.command]['jobid']
-    #            link_t = f"<a target='_blank' href='{result_file}'> After job is completed, click here to view telemetry dashboard</a>"
-    #            #telemetry_button.disabled=True
-    #            telemetry_URL.value = link_t
-    #        telemetry_button.on_click(displayTelemetry)
-    #    thread = threading.Thread(target=_work, args=())
-    #    thread.start()
-    #    return telemetry_box
-
     def addTelemetryButton(self):
-        result_file = "https://devcloud.intel.com/edge/metrics/d/"+self.jobDict[self.command]['jobid']
-        link_t = f'<a style="font-weight:bold" target="_blank" href="{result_file}"> After job is completed, click here to view telemetry dashboard</a>'
-        telemetry_URL = widgets.HTML(link_t)
-        return telemetry_URL
+        telemetry_button = widgets.Button(description='Telemetry', disabled=False, button_style='info')
+        telemetry_status = widgets.HTML(value = "")
+        telemetry_box = widgets.VBox([telemetry_button, telemetry_status])
+
+        def displayTelemetry(event):
+                if Interface.jobStillRunning(self.command):
+                    telemetry_status.value = "Telemetry results are not ready yet"
+                else:
+                    telemetry_status.value = ""
+                    URL = "https://devcloud.intel.com/edge/metrics/d/"+self.jobDict[self.command]['jobid']
+                    #link_t = f"<a target='_blank' href='{result_file}'> After job is completed, click here to view telemetry dashboard</a>"
+                    script=f"<script>var win = window.open('{URL}', '_blank');</script>"
+                    display(HTML ('''{}'''.format(script)))
+        telemetry_button.on_click(displayTelemetry)
+        #thread = threading.Thread(target=_work, args=())
+        #thread.start()
+        return telemetry_box
+
+    #def addTelemetryButton(self):
+    #    result_file = "https://devcloud.intel.com/edge/metrics/d/"+self.jobDict[self.command]['jobid']
+    #    link_t = f'<a style="font-weight:bold" target="_blank" href="{result_file}"> After job is completed, click here to view telemetry dashboard</a>'
+    #    telemetry_URL = widgets.HTML(link_t)
+    #    return telemetry_URL
 
