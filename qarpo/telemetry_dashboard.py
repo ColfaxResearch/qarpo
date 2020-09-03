@@ -35,7 +35,7 @@ loader = '''<!DOCTYPE html>
 </head>
 <body>
 
-<div class="loader"></div> Initializing and loading the Deep Learning Workbench. This will take approximately one minute.
+<div class="loader"></div> Initializing and loading the dashboard. This will take approximately one minute.
 
 </body>
 </html>
