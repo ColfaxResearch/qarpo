@@ -57,7 +57,7 @@ class DashboardLauncher():
     
         def on_stop_clicked(b):
             self.cancelJob()
-            self.loader.value = 'DL workbench job terminated'
+            self.loader.value = 'Dashboard job terminated'
             self.display_box.children = [self.start_button, self.loader]
 
 
@@ -70,7 +70,7 @@ class DashboardLauncher():
         output, error = p.communicate()
         self.jobid = output.decode("utf-8").rstrip().split('.')[0]
         if self.jobid == "":
-            self.loader.value = "<span style='color:red'>&#9888;</span> Launch DL dashboard failed"
+            self.loader.value = "<span style='color:red'>&#9888;</span> Launching dashboard failed"
             return
         else:
             self.loader.value = f'''{loader}'''
@@ -90,8 +90,8 @@ class DashboardLauncher():
                     if str_ in x:
                         url_detected = True
                         url = x.rstrip()
-                        self.loader.value = "You'll be redirected to DL workbench"
                         self.redirectURL(url)
+                        self.loader.value = "Dashboard successfully launched"
                         break
 
         thread = threading.Thread(target=_work, args=())
