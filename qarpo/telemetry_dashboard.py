@@ -35,7 +35,8 @@ loader = '''<!DOCTYPE html>
 </head>
 <body>
 
-<div class="loader"></div> Initializing and loading the dashboard. This will take approximately one minute.
+<div class="loader"></div>{status}
+
 
 </body>
 </html>
@@ -43,22 +44,25 @@ loader = '''<!DOCTYPE html>
 
 
 class DashboardLauncher():
-    def __init__(self, command, search_url):
+    def __init__(self, command, search_url, display_name, duration):
         self.command = command
         self.pointer = search_url
+        self.name = display_name
+        self.duration = duration
         self.start_button = widgets.Button(description='Launch Dashboard', disabled=False, button_style='info')
         self.stop_button = widgets.Button(description='Stop Dashboard', disabled=False, button_style='info')
-        self.loader = widgets.HTML(value='')
-        self.display_box = widgets.VBox([self.start_button, self.loader])
+        self.status = widgets.HTML(value='')
+        self.display_box = widgets.VBox([self.start_button, self.status])
         url = None
         def on_start_clicked(b):
-            self.display_box.children = [self.stop_button, self.loader]
+            self.display_box.children = [self.stop_button, self.status]
             self.submitDashboardJob()
     
         def on_stop_clicked(b):
+            self.stop_button.disabled = True
             self.cancelJob()
-            self.loader.value = 'Dashboard job terminated'
-            self.display_box.children = [self.start_button, self.loader]
+            self.status.value = f'{self.name} job terminated'
+            self.display_box.children = [self.start_button, self.status]
 
 
         self.start_button.on_click(on_start_clicked)
@@ -70,10 +74,10 @@ class DashboardLauncher():
         output, error = p.communicate()
         self.jobid = output.decode("utf-8").rstrip().split('.')[0]
         if self.jobid == "":
-            self.loader.value = "<span style='color:red'>&#9888;</span> Launching dashboard failed"
+            self.status.value = f"<span style='color:red'>&#9888;</span> Launching {self.name} failed"
             return
         else:
-            self.loader.value = f'''{loader}'''
+            self.status.value = loader.replace('{status}', f"Initializing and loading {self.name}. This will take approximately {self.duration}.")
             self.detectURL()
 
     def detectURL(self):
@@ -91,7 +95,7 @@ class DashboardLauncher():
                         url_detected = True
                         url = x.rstrip()
                         self.redirectURL(url)
-                        self.loader.value = "Dashboard successfully launched"
+                        self.status.value = f"{self.name} successfully launched"
                         break
 
         thread = threading.Thread(target=_work, args=())
@@ -100,13 +104,25 @@ class DashboardLauncher():
     
     def redirectURL(self, URL):
         script=f"<script>var win = window.open('{URL}', '_blank');</script>"
-        display(HTML ('''{}'''.format(script)))
+        new_tab = HTML ('''{}'''.format(script))
+        display(new_tab)
           
 
     def cancelJob(self):
         cmd = f'qdel {self.jobid}'
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
         output, err = p.communicate()
+        self.status.value = loader.replace("{status}",f"Cancelling {self.name} job")
+        cmd = 'qstat '+self.jobid
+        cancelled = False
+        while not cancelled:
+            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
+            output,_ = p.communicate()
+            cancelled = True if output.decode().rstrip() == '' else False
+            time.sleep(7.0)
+
+
+
 
 
 
