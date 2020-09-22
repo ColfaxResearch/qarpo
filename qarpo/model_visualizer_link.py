@@ -1,6 +1,7 @@
 import os
 import getpass
 from IPython.core.display import HTML
+import ipywidgets as widgets
 
 
 
@@ -51,6 +52,7 @@ def showModelVisualizerLink(relative_path, label=None):
     # Form the HTML element for the link:
     link_t = "<a target='_blank' href='{url}'>{label}</a>"
     link   = link_t.format(url=url, label=label_text)
+    link_text = f'View model graph:  <span title="View model">&#128065; </span>{link}</span>'
         
     # Display the link
-    display(HTML(link))
+    display(widgets.HTML(value=link_text))

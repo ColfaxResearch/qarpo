@@ -105,13 +105,14 @@ def summaryPlot(results_list, x_axis, y_axis, title, plot, colors=None, disclaim
     arch = []
     diff = 0
     for path, hw in results_list:
-        if os.path.isfile(path):
+        #Check if the stat file exist and not empty
+        if os.path.isfile(path) and os.path.getsize(path) != 0:
             f = open(path, "r")
             l1_time = float(f.readline())
             l2_count = float(f.readline())
             if plot=="time":
                 val.append(l1_time)
-            else:
+            elif plot=="fps":
                 val.append((l2_count/l1_time))
             f.close()
         else:
