@@ -55,6 +55,7 @@ class DashboardLauncher():
         self.display_box = widgets.VBox([self.start_button, self.status])
         url = None
         def on_start_clicked(b):
+            self.stop_button.disabled = False
             self.display_box.children = [self.stop_button, self.status]
             self.submitDashboardJob()
     
