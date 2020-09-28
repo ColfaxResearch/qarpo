@@ -49,8 +49,8 @@ class DashboardLauncher():
         self.pointer = search_url
         self.name = display_name
         self.duration = duration
-        self.start_button = widgets.Button(description='Launch Dashboard', disabled=False, button_style='info')
-        self.stop_button = widgets.Button(description='Stop Dashboard', disabled=False, button_style='info')
+        self.start_button = widgets.Button(description='Start Application', disabled=False, button_style='info')
+        self.stop_button = widgets.Button(description='Stop Application', disabled=False, button_style='info')
         self.status = widgets.HTML(value='')
         self.display_box = widgets.VBox([self.start_button, self.status])
         url = None
