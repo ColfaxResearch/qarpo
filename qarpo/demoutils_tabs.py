@@ -17,6 +17,7 @@ import io
 import urllib, base64
 import urllib.parse
 from .disclaimer import *
+from .json_validate import jsonValidate
 
 #Global variable PROG_START
 PROG_START = 0
@@ -77,6 +78,10 @@ class Interface:
 
     def __init__(self, config):
         container_list = []
+        val_output, err = jsonValidate(config)
+        if val_output == False:
+            print(f"Input data is not valid: {err}")
+            return
         # to disable the disclaimer display, set disclaimer=""
         self.disclaimer = config["disclaimer"] if "disclaimer" in config else defaultDisclaimer()
         self.command = config["job"]["command"] if "command" in config["job"] else ""
@@ -385,15 +390,15 @@ class Interface:
             stats_line = ""
         string = ""
         height = '480' if len(op_list) == 1 else '240'
-        if self.output_type == ".mp4":
+        if self.output_type in [ ".mp4", ".avi", ".mov"]:
             for x in op_list:
                 op_vid = '/user/{user_id}/files/{wd_path}/{rd_path}/{file_}'.format(user_id=pwd.getpwuid(os.getuid()).pw_name, wd_path=os.getcwd().split('/', 3)[3], rd_path=result_path, file_=x)
                 string += "<video alt=\"\" controls autoplay height=\"{height}\"><source src=\"{op}\" type=\"video/mp4\" /></video>".format(op=op_vid, height=height)
-        elif self.output_type == ".png":
+        elif self.output_type in  [".png", ".jpg", ".bmp"]:
             for x in op_list:
                 op_img = '/user/{user_id}/files/{wd_path}/{rd_path}/{file_}'.format(user_id=pwd.getpwuid(os.getuid()).pw_name, wd_path=os.getcwd().split('/', 3)[3], rd_path=result_path, file_=x)
                 string += "<img src='{img}' width='783' height='{height}'>".format(img=op_img, height=height)
-        elif self.output_type == ".txt":
+        elif self.output_type in [".txt", ".e", ".o"]:
             for x in op_list:
                 op_txt = os.path.join(result_path, x)
                 with open(op_txt, 'r') as f:
