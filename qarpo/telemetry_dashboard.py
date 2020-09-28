@@ -76,6 +76,7 @@ class DashboardLauncher():
         self.jobid = output.decode("utf-8").rstrip().split('.')[0]
         if self.jobid == "":
             self.status.value = f"<span style='color:red'>&#9888;</span> Launching {self.name} failed"
+            self.display_box.children = [self.start_button, self.status]
             return
         else:
             self.status.value = loader.replace('{status}', f"Initializing and loading {self.name}. This will take approximately {self.duration}.")
