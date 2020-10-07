@@ -53,6 +53,7 @@ class DashboardLauncher():
         self.stop_button = widgets.Button(description='Stop Application', disabled=False, button_style='info')
         self.status = widgets.HTML(value='')
         self.display_box = widgets.VBox([self.start_button, self.status])
+
         url = None
         def on_start_clicked(b):
             self.stop_button.disabled = False
@@ -105,7 +106,15 @@ class DashboardLauncher():
 
     
     def redirectURL(self, URL):
-        script=f"<script>var win = window.open('{URL}', '_blank');</script>"
+        self.time_created = time.time()*1000
+        script = new_tab =f'''<script>
+                    var d = new Date();
+                    var time_now = d.getTime();
+                    var timeout = 7000;
+                    if (time_now - {self.time_created} < timeout) {{
+                        var win = window.open('{URL}', '_blank');
+                    }}
+                    </script>'''
         new_tab = HTML ('''{}'''.format(script))
         display(new_tab)
           
