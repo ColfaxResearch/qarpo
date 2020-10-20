@@ -98,7 +98,7 @@ class DashboardLauncher():
                         url_detected = True
                         url = x.rstrip()
                         self.redirectURL(url)
-                        self.status.value = f"{self.name} successfully launched"
+                        self.status.value = f'{self.name} successfully launched.<br>If the application does not load in a new browser window, disable pop-up blocking in your browser settings and click <a href="{url}">this link</a> to access {self.name}. '
                         break
 
         thread = threading.Thread(target=_work, args=())
