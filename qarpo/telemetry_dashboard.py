@@ -44,7 +44,7 @@ loader = '''<!DOCTYPE html>
 
 
 class DashboardLauncher():
-    def __init__(self, command, search_url, display_name, duration):
+    def __init__(self, command, search_url, display_name, duration, queue):
         self.command = command
         self.pointer = search_url
         self.name = display_name
@@ -52,7 +52,11 @@ class DashboardLauncher():
         self.start_button = widgets.Button(description='Start Application', disabled=False, button_style='info')
         self.stop_button = widgets.Button(description='Stop Application', disabled=False, button_style='info')
         self.status = widgets.HTML(value='')
-        self.display_box = widgets.VBox([self.start_button, self.status])
+        prev_jobs, job_ids = self.jobsRunning(queue)
+        if prev_jobs == True:
+            print("Jobs still running")
+        else:
+            self.display_box = widgets.VBox([self.start_button, self.status])
 
         url = None
         def on_start_clicked(b):
@@ -70,6 +74,20 @@ class DashboardLauncher():
         self.start_button.on_click(on_start_clicked)
         self.stop_button.on_click(on_stop_clicked)
         display(self.display_box)
+
+
+    def jobsRunning(queue_name):
+        command = f'qstat {queue_name}'
+        p = subprocess.Popen(self.command, stdout=subprocess.PIPE, shell=True)
+        output, error = p.communicate()
+        jobs = output.decode("utf-8")
+        print(jobs)
+        if jobs = '':
+            return False, ""
+        else:
+            return True, jobs
+
+
 
     def submitDashboardJob(self):
         p = subprocess.Popen(self.command, stdout=subprocess.PIPE, shell=True)
