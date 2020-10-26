@@ -4,7 +4,8 @@ import ipywidgets as widgets
 import subprocess
 import threading
 import time
-
+import os
+from qarpo.query_nodes import getFreeJobSlots
 
 
 loader = '''<!DOCTYPE html>
@@ -52,17 +53,30 @@ class DashboardLauncher():
         self.start_button = widgets.Button(description='Start Application', disabled=False, button_style='info')
         self.stop_button = widgets.Button(description='Stop Application', disabled=False, button_style='info')
         self.status = widgets.HTML(value='')
-        prev_jobs, job_ids = self.jobsRunning(queue)
-        if prev_jobs == True:
-            print("Jobs still running")
+        prev_job, job_id = self.jobsRunning(queue)
+        if prev_job == True:
+            self.new_job = False
+            self.jobid = job_id
+            self.status.value = f'You have a previous {display_name} session that is still running.<br>you will be redirected in a minute. '
+            self.detectURL()
+            self.display_box = widgets.VBox([self.stop_button, self.status])
         else:
+            self.new_job = True
             self.display_box = widgets.VBox([self.start_button, self.status])
 
-        url = None
         def on_start_clicked(b):
-            self.stop_button.disabled = False
-            self.display_box.children = [self.stop_button, self.status]
-            self.submitDashboardJob()
+            self.status.value = "Loading ..."
+            queue_server = os.getenv('PBS_DEFAULT')
+            match_properties = [queue]
+            available_slots, free_slots = getFreeJobSlots(queue_server, match_properties, verbose=False)
+            if free_slots == 0 :
+                self.status.value = f"All available {display_name} nodes are currently occupied, please try again later."
+                self.display_box.children = [self.start_button, self.status]
+            else:
+                self.new_job = True
+                self.stop_button.disabled = False
+                self.display_box.children = [self.stop_button, self.status]
+                self.submitDashboardJob()
     
         def on_stop_clicked(b):
             self.stop_button.disabled = True
@@ -76,17 +90,15 @@ class DashboardLauncher():
         display(self.display_box)
 
 
-    def jobsRunning(queue_name):
+    def jobsRunning(self, queue_name):
         command = f'qstat {queue_name}'
-        p = subprocess.Popen(self.command, stdout=subprocess.PIPE, shell=True)
+        p = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
         output, error = p.communicate()
         jobs = output.decode("utf-8")
-        print(jobs)
-        if jobs = '':
+        if jobs == '':
             return False, ""
         else:
-            return True, jobs
-
+            return True, jobs.rsplit("\n")[2].rsplit(".")[0]
 
 
     def submitDashboardJob(self):
@@ -101,22 +113,34 @@ class DashboardLauncher():
             self.status.value = loader.replace('{status}', f"Initializing and loading {self.name}. This will take approximately {self.duration}.")
             self.detectURL()
 
+            
     def detectURL(self):
         op_cmd = [f'qpeek {self.jobid}']
         def _work():
             url_detected = False
+            str_ = self.pointer
             while not url_detected:
                 p = subprocess.Popen(op_cmd, stdout=subprocess.PIPE, shell=True)
                 output,_ = p.communicate()
                 output = output.decode().split('\n')
                 time.sleep(3.0)
-                str_ = self.pointer
+                if output == ['']:
+                    p2 = subprocess.Popen([f'qstat {self.jobid}'], stdout=subprocess.PIPE, shell=True)
+                    jobstatus,_ = p2.communicate()
+                    if jobstatus == b'': 
+                        self.status.value = f'{self.name} session terminated'
+                        self.display_box.children = [self.start_button, self.status]
+                        return
                 for x in output:
                     if str_ in x:
                         url_detected = True
                         url = x.rstrip()
                         self.redirectURL(url)
-                        self.status.value = f'{self.name} successfully launched.<br>If the application does not load in a new browser window, disable pop-up blocking in your browser settings and click <a href="{url}">this link</a> to access {self.name}. '
+                        if self.new_job == True:
+                            self.status.value = f'{self.name} successfully launched.<br>If the application does not load in a new browser window, disable pop-up blocking in your browser settings and click <a href="{url}">this link</a> to access {self.name}. '
+                        else:
+                            self.status.value = f'You have a previous {self.name} session that is still running.<br>If the application does not load in a new browser window, disable pop-up blocking in your browser settings and click <a href="{url}">this link</a> to access {self.name}. '
+                            
                         break
 
         thread = threading.Thread(target=_work, args=())
@@ -135,20 +159,24 @@ class DashboardLauncher():
                     </script>'''
         new_tab = HTML ('''{}'''.format(script))
         display(new_tab)
+        
           
 
     def cancelJob(self):
+        status = loader.replace("{status}",f"Cancelling {self.name} job")
         cmd = f'qdel {self.jobid}'
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
         output, err = p.communicate()
-        self.status.value = loader.replace("{status}",f"Cancelling {self.name} job")
         cmd = 'qstat '+self.jobid
         cancelled = False
         while not cancelled:
+            self.status.value = status
+            self.display_box.children = [self.stop_button, self.status]
             p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
             output,_ = p.communicate()
             cancelled = True if output.decode().rstrip() == '' else False
             time.sleep(7.0)
+        return
 
 
 
