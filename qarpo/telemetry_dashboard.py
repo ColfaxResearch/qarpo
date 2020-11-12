@@ -5,7 +5,7 @@ import subprocess
 import threading
 import time
 import os
-from qarpo.query_nodes import getFreeJobSlots
+from .query_nodes import getFreeJobSlots
 
 
 loader = '''<!DOCTYPE html>
@@ -45,7 +45,7 @@ loader = '''<!DOCTYPE html>
 
 
 class DashboardLauncher():
-    def __init__(self, command, search_url, display_name, duration, queue):
+    def __init__(self, command, search_url, display_name, duration, queue, node_property, one_use_token = False):
         self.command = command
         self.pointer = search_url
         self.name = display_name
@@ -53,11 +53,12 @@ class DashboardLauncher():
         self.start_button = widgets.Button(description='Start Application', disabled=False, button_style='info')
         self.stop_button = widgets.Button(description='Stop Application', disabled=False, button_style='info')
         self.status = widgets.HTML(value='')
+        self.one_use_token = one_use_token
         prev_job, job_id = self.jobsRunning(queue)
         if prev_job == True:
             self.new_job = False
             self.jobid = job_id
-            self.status.value = f'You have a previous {display_name} session that is still running.<br>you will be redirected in a minute. '
+            self.status.value = loader.replace('{status}', f"Loading {self.name}.")
             self.detectURL()
             self.display_box = widgets.VBox([self.stop_button, self.status])
         else:
@@ -67,10 +68,10 @@ class DashboardLauncher():
         def on_start_clicked(b):
             self.status.value = "Loading ..."
             queue_server = os.getenv('PBS_DEFAULT')
-            match_properties = [queue]
+            match_properties = [node_property]
             available_slots, free_slots = getFreeJobSlots(queue_server, match_properties, verbose=False)
             if free_slots == 0 :
-                self.status.value = f"All available {display_name} nodes are currently occupied, please try again later."
+                self.status.value = f"All nodes are currently in use and the {display_name} cannot be launched at this time. Please try again in a few minutes."
                 self.display_box.children = [self.start_button, self.status]
             else:
                 self.new_job = True
@@ -135,12 +136,10 @@ class DashboardLauncher():
                     if str_ in x:
                         url_detected = True
                         url = x.rstrip()
-                        self.redirectURL(url)
+                        url_return = url.split("token")[0] if self.one_use_token else url
                         if self.new_job == True:
-                            self.status.value = f'{self.name} successfully launched.<br>If the application does not load in a new browser window, disable pop-up blocking in your browser settings and click <a href="{url}">this link</a> to access {self.name}. '
-                        else:
-                            self.status.value = f'You have a previous {self.name} session that is still running.<br>If the application does not load in a new browser window, disable pop-up blocking in your browser settings and click <a href="{url}">this link</a> to access {self.name}. '
-                            
+                            self.redirectURL(url)
+                        self.status.value = f'{self.name} successfully launched.<br>If the {self.name} application fails to launch in a new browser window, disable your pop-up blocker and <a href="{url}" target="_blank">launch the application here to access.</a><br><a href="{url_return}" target="_blank">Return to {self.name}.</a>'
                         break
 
         thread = threading.Thread(target=_work, args=())
