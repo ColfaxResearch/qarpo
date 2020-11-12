@@ -137,9 +137,9 @@ class DashboardLauncher():
                         url_detected = True
                         url = x.rstrip()
                         url_return = url.split("token")[0] if self.one_use_token else url
-                        if self.new_job == True:
-                            self.redirectURL(url)
-                        self.status.value = f'{self.name} successfully launched.<br>If the {self.name} application fails to launch in a new browser window, disable your pop-up blocker and <a href="{url}" target="_blank">launch the application here to access.</a><br><a href="{url_return}" target="_blank">Return to {self.name}.</a>'
+                        #if self.new_job == True:
+                        #    self.redirectURL(url)
+                        self.status.value = f'{self.name} successfully launched.<br><a href="{url}" target="_blank">Click this link to launch and access {self.name}.</a><br><a href="{url_return}" target="_blank">Return to {self.name}.</a>'
                         break
 
         thread = threading.Thread(target=_work, args=())
