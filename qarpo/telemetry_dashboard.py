@@ -111,7 +111,7 @@ class DashboardLauncher():
             self.display_box.children = [self.start_button, self.status]
             return
         else:
-            self.status.value = loader.replace('{status}', f"Initializing and loading {self.name}. This will take approximately {self.duration}.")
+            self.status.value = loader.replace('{status}', f"Initializing and loading {self.name}. This will take approximately {self.duration}.<br>JOB ID = {self.jobid}")
             self.detectURL()
 
             
