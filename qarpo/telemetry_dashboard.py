@@ -58,7 +58,7 @@ class DashboardLauncher():
         if prev_job == True:
             self.new_job = False
             self.jobid = job_id
-            self.status.value = loader.replace('{status}', f"Loading {self.name}.")
+            self.status.value = loader.replace('{status}', f"Loading {self.name}.<br>JOB ID = {self.jobid}")
             self.detectURL()
             self.display_box = widgets.VBox([self.stop_button, self.status])
         else:
@@ -139,7 +139,7 @@ class DashboardLauncher():
                         url_return = url.split("token")[0] if self.one_use_token else url
                         #if self.new_job == True:
                         #    self.redirectURL(url)
-                        self.status.value = f'{self.name} successfully launched.<br><a href="{url}" target="_blank">Click this link to launch and access {self.name}.</a><br><a href="{url_return}" target="_blank">Return to {self.name}.</a>'
+                        self.status.value = f'{self.name} successfully initialized.<br><a href="{url}" target="_blank">Launch {self.name} (for the first time).</a><br><a href="{url_return}" target="_blank">Return to {self.name} session (if previously closed).</a><br>JOB ID = {self.jobid}'
                         break
 
         thread = threading.Thread(target=_work, args=())
@@ -169,7 +169,7 @@ class DashboardLauncher():
         cmd = 'qstat '+self.jobid
         cancelled = False
         while not cancelled:
-            self.status.value = status
+            self.status.value = status+f'<br>JOB ID = {self.jobid}'
             self.display_box.children = [self.stop_button, self.status]
             p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
             output,_ = p.communicate()
