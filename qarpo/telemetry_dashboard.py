@@ -45,7 +45,7 @@ loader = '''<!DOCTYPE html>
 
 
 class DashboardLauncher():
-    def __init__(self, command, search_url, display_name, duration, queue, node_property, one_use_token = False):
+    def __init__(self, command, search_url, display_name, duration, queue, node_property, one_use_token = False, exit_error = None):
         self.command = command
         self.pointer = search_url
         self.name = display_name
@@ -54,6 +54,7 @@ class DashboardLauncher():
         self.stop_button = widgets.Button(description='Stop Application', disabled=False, button_style='info')
         self.status = widgets.HTML(value='')
         self.one_use_token = one_use_token
+        self.exit_error = exit_error
         prev_job, job_id = self.jobsRunning(queue)
         if prev_job == True:
             self.new_job = False
@@ -81,7 +82,8 @@ class DashboardLauncher():
     
         def on_stop_clicked(b):
             self.stop_button.disabled = True
-            self.cancelJob()
+            status = f"Cancelling {self.name} job"
+            self.cancelJob(status)
             self.status.value = f'{self.name} job terminated'
             self.display_box.children = [self.start_button, self.status]
 
@@ -121,6 +123,13 @@ class DashboardLauncher():
             url_detected = False
             str_ = self.pointer
             while not url_detected:
+                #Check if exit_error is provided and if it appeared in stderr log
+                if not self.exit_error == None and self.detectErr():
+                    cancel_status = f'{self.name} job {self.jobid} failed, please contact the following email for support'
+                    self.cancelJob(cancel_status)
+                    self.status.value = cancel_status
+                    self.display_box.children = [self.start_button, self.status]
+                    return
                 p = subprocess.Popen(op_cmd, stdout=subprocess.PIPE, shell=True)
                 output,_ = p.communicate()
                 output = output.decode().split('\n')
@@ -142,8 +151,21 @@ class DashboardLauncher():
                         self.status.value = f'{self.name} successfully initialized.<br><a href="{url}" target="_blank">Launch {self.name} (for the first time).</a><br><a href="{url_return}" target="_blank">Return to {self.name} session (if previously closed).</a><br>JOB ID = {self.jobid}'
                         break
 
+
+
+
         thread = threading.Thread(target=_work, args=())
         thread.start()
+
+    def detectErr(self):
+        err_cmd = [f'qpeek -e {self.jobid}']
+        p = subprocess.Popen(err_cmd, stdout=subprocess.PIPE, shell=True)
+        output,_ = p.communicate()
+        output = output.decode()
+        err_detected = True if self.exit_error in output else False
+        return err_detected
+
+
 
     
     def redirectURL(self, URL):
@@ -161,8 +183,8 @@ class DashboardLauncher():
         
           
 
-    def cancelJob(self):
-        status = loader.replace("{status}",f"Cancelling {self.name} job")
+    def cancelJob(self, cancel_status):
+        status = loader.replace("{status}", cancel_status)
         cmd = f'qdel {self.jobid}'
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
         output, err = p.communicate()

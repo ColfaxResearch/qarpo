@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="qarpo",
-    version="1.0.26",
+    version="1.0.27",
     author="AlaaEltablawy",
     author_email="alaa@colfax-intl.com",
     description="Jyputer interface for job preparation and submission to job scheduler, Check repo status and refresh repo",
