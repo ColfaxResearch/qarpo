@@ -45,7 +45,15 @@ loader = '''<!DOCTYPE html>
 
 
 class DashboardLauncher():
-    def __init__(self, command, search_url, display_name, duration, queue, node_property, one_use_token = False, exit_error = None):
+    ## search_url: string, telemetry dashboard url to be detected in stdout
+    ## display_name: string, name of the dashboard
+    ## duration: string, time to launch dashboard, only used in the displayed status
+    ## queue: string, name of the queue to submit job to
+    ## node property: string, node property, needed to detect if nodes with specific properties are available
+    ##one_use_token: boolen , set to true if token in the url detected to open the telemetry dashboard is valid for single use
+    ##exit_error: string, set to the error string to be searched for in stderr
+    ##timeout: int, if job is running for n seconds and url was not detected, delete job using qdel
+    def __init__(self, command, search_url, display_name, duration, queue, node_property, one_use_token = False, exit_error = None, timeout=1000):
         self.command = command
         self.pointer = search_url
         self.name = display_name
@@ -55,6 +63,8 @@ class DashboardLauncher():
         self.status = widgets.HTML(value='')
         self.one_use_token = one_use_token
         self.exit_error = exit_error
+        #Time out, qdel will be called to kill the job after n seconds
+        self.timeout = timeout 
         prev_job, job_id = self.jobsRunning(queue)
         if prev_job == True:
             self.new_job = False
@@ -114,6 +124,7 @@ class DashboardLauncher():
             return
         else:
             self.status.value = loader.replace('{status}', f"Initializing and loading {self.name}. This will take approximately {self.duration}.<br>JOB ID = {self.jobid}")
+            self.start_time = time.time()
             self.detectURL()
 
             
@@ -124,7 +135,7 @@ class DashboardLauncher():
             str_ = self.pointer
             while not url_detected:
                 #Check if exit_error is provided and if it appeared in stderr log
-                if not self.exit_error == None and self.detectErr():
+                if not self.exit_error == None and self.detectErr() or time.time()-self.start_time >= self.timeout:
                     cancel_status = f'{self.name} job {self.jobid} failed, please contact the following email for support'
                     self.cancelJob(cancel_status)
                     self.status.value = cancel_status
