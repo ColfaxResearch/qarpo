@@ -139,7 +139,7 @@ class DashboardLauncher():
                         url_return = url.split("token")[0] if self.one_use_token else url
                         #if self.new_job == True:
                         #    self.redirectURL(url)
-                        self.status.value = f'{self.name} successfully initialized.<br><a href="{url}" target="_blank">Launch {self.name} (for the first time).</a><br><a href="{url_return}" target="_blank">Return to {self.name} session (if previously closed).</a><br>JOB ID = {self.jobid}'
+                        self.status.value = f'{self.name} successfully initialized.<br><a href="{url}" target="_blank">Launch {self.name} (open this session for the first time).</a><br><a href="{url_return}" target="_blank">Open {self.name} (return to your currently running session).</a><br>JOB ID = {self.jobid}'
                         break
 
         thread = threading.Thread(target=_work, args=())
