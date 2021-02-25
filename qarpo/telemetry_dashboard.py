@@ -53,7 +53,9 @@ class DashboardLauncher():
     ##one_use_token: boolen , set to true if token in the url detected to open the telemetry dashboard is valid for single use
     ##exit_error: string, set to the error string to be searched for in stderr
     ##timeout: int, if job is running for n seconds and url was not detected, delete job using qdel
-    def __init__(self, command, search_url, display_name, duration, queue, node_property, one_use_token = False, exit_error = None, timeout=1000):
+    def __init__(self, command, search_url, display_name, duration, queue, node_property, one_use_token = False, exit_error = None, timeout=1000, 
+                 launch_link_msg = "Select this to access the DL workbench after initializing.", 
+                 reopen_link_msg = "Select this to return to the DL workbench if you already launched it and it has been less than 4 hours of time since you accessed it."):
         self.command = command
         self.pointer = search_url
         self.name = display_name
@@ -65,6 +67,8 @@ class DashboardLauncher():
         self.exit_error = exit_error
         #Time out, qdel will be called to kill the job after n seconds
         self.timeout = timeout 
+        self.launch_link_msg = launch_link_msg
+        self.reopen_link_msg = reopen_link_msg
         prev_job, job_id = self.jobsRunning(queue)
         if prev_job == True:
             self.new_job = False
@@ -159,7 +163,7 @@ class DashboardLauncher():
                         url_return = url.split("token")[0] if self.one_use_token else url
                         #if self.new_job == True:
                         #    self.redirectURL(url)
-                        self.status.value = f'{self.name} successfully initialized.<br><a href="{url}" target="_blank">Launch {self.name} (open this session for the first time).</a><br><a href="{url_return}" target="_blank">Open {self.name} (return to your currently running session).</a><br>JOB ID = {self.jobid}'
+                        self.status.value = f'{self.name} successfully initialized.<br><table cellpadding="5" style="border:1px black solid"><tr><td style="text-align:left;color:blue;hover:purple"><a href="{url}" target="_blank">Launch {self.name}</a></td><td style="text-align:left">{self.launch_link_msg}</td></tr><td style="text-align:left;color:blue;hover:purple"><a href="{url_return}" target="_blank">Open {self.name}</a></td><td style="text-align:left">{self.reopen_link_msg}</td></tr></table><br>JOB ID = {self.jobid}'
                         break
 
 
