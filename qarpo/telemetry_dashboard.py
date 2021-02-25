@@ -55,7 +55,8 @@ class DashboardLauncher():
     ##timeout: int, if job is running for n seconds and url was not detected, delete job using qdel
     def __init__(self, command, search_url, display_name, duration, queue, node_property, one_use_token = False, exit_error = None, timeout=1000, 
                  launch_link_msg = "Select this to access the DL workbench after initializing.", 
-                 reopen_link_msg = "Select this to return to the DL workbench if you already launched it and it has been less than 4 hours of time since you accessed it."):
+                 reopen_link_msg = "Select this to return to the DL workbench if you already launched it and it has been less than 4 hours of time since you accessed it.",
+                 error_contact_msg = f'Please visit the <a href="https://community.intel.com/t5/Intel-DevCloud-for-Edge/bd-p/devcloud-edge" target="_blank">forums</a> for support.'):
         self.command = command
         self.pointer = search_url
         self.name = display_name
@@ -69,6 +70,7 @@ class DashboardLauncher():
         self.timeout = timeout 
         self.launch_link_msg = launch_link_msg
         self.reopen_link_msg = reopen_link_msg
+        self.error_contact_msg = error_contact_msg
         prev_job, job_id = self.jobsRunning(queue)
         if prev_job == True:
             self.new_job = False
@@ -140,7 +142,7 @@ class DashboardLauncher():
             while not url_detected:
                 #Check if exit_error is provided and if it appeared in stderr log
                 if not self.exit_error == None and self.detectErr() or time.time()-self.start_time >= self.timeout:
-                    cancel_status = f'{self.name} job {self.jobid} failed, please contact the following email for support'
+                    cancel_status = f'{self.name} job {self.jobid} failed, {self.error_contact_msg}'
                     self.cancelJob(cancel_status)
                     self.status.value = cancel_status
                     self.display_box.children = [self.start_button, self.status]
