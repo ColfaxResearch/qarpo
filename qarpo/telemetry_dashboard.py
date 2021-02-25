@@ -142,7 +142,7 @@ class DashboardLauncher():
             while not url_detected:
                 #Check if exit_error is provided and if it appeared in stderr log
                 if not self.exit_error == None and self.detectErr() or time.time()-self.start_time >= self.timeout:
-                    cancel_status = f'{self.name} job {self.jobid} failed, {self.error_contact_msg}'
+                    cancel_status = f'{self.name} job {self.jobid} failed. {self.error_contact_msg}'
                     self.cancelJob(cancel_status)
                     self.status.value = cancel_status
                     self.display_box.children = [self.start_button, self.status]
@@ -165,7 +165,7 @@ class DashboardLauncher():
                         url_return = url.split("token")[0] if self.one_use_token else url
                         #if self.new_job == True:
                         #    self.redirectURL(url)
-                        self.status.value = f'{self.name} successfully initialized.<br><table cellpadding="5" style="border:1px black solid"><tr><td style="text-align:left;color:blue;hover:purple"><a href="{url}" target="_blank">Launch {self.name}</a></td><td style="text-align:left">{self.launch_link_msg}</td></tr><td style="text-align:left;color:blue;hover:purple"><a href="{url_return}" target="_blank">Open {self.name}</a></td><td style="text-align:left">{self.reopen_link_msg}</td></tr></table><br>JOB ID = {self.jobid}'
+                        self.status.value = f'{self.name} successfully initialized.<br><table cellpadding="5" style="border:1px black solid"><tr><td style="text-align:left;color:blue;hover:purple;padding:0 15px 0 15px;"><a href="{url}" target="_blank">Launch {self.name}</a></td><td style="text-align:left">{self.launch_link_msg}</td></tr><td style="text-align:left;color:blue;hover:purple;padding:0 15px 0 15px;"><a href="{url_return}" target="_blank">Open {self.name}</a></td><td style="text-align:left">{self.reopen_link_msg}</td></tr></table><br>JOB ID = {self.jobid}'
                         break
 
 
