@@ -8,6 +8,7 @@ import subprocess
 import datetime
 import matplotlib
 import matplotlib.pyplot as plt
+from IPython.display import set_matplotlib_formats
 import os 
 import warnings
 from .disclaimer import *
@@ -139,6 +140,90 @@ def summaryPlot(results_list, x_axis, y_axis, title, plot, colors=None, disclaim
     # to disable the disclaimer display, supply "disclaimer=False" argument
     if disclaimer:
         display(widgets.HTML(value=disclaimer))
+
+
+
+def summaryPlotWithURL(results_list, x_axis, y_axis, title, plot, colors=None, disclaimer=None):
+    ''' Bar plot input:
+	results_dict: dictionary of path to result file and label {path_to_result:label}
+	x_axis: label of the x axis
+	y_axis: label of the y axis
+	title: title of the graph
+        plot: plot type (time, fps)
+    '''
+    warnings.filterwarnings('ignore')
+    set_matplotlib_formats("svg")
+    if plot=='time':
+        clr = 'xkcd:blue'
+    else:
+        clr = 'xkcd:azure'
+    if colors is not None:
+        clr = colors
+    # If the disclaimer is not specified, it defaults to None
+    # and then replaced with the default text below:
+    if disclaimer is None:
+        disclaimer=defaultDisclaimer()
+
+    plt.figure(figsize=(11, 7))
+    plt.title(title , fontsize=24, color='black', fontweight='bold')
+    plt.ylabel(y_axis, fontsize=12, color=clr)
+    plt.xlabel(x_axis, fontsize=12, color=clr,  labelpad=60, verticalalignment='top')
+    #plt.xticks(fontsize=16)
+    plt.xticks([])
+    plt.yticks(fontsize=12)
+
+    val = []
+    arch = []
+    xlab = []
+    URLs = []
+    xv = 0
+    diff = 0
+        
+    for path, hw, url in results_list:
+        #Check if the stat file exist and not empty
+        if os.path.isfile(path) and os.path.getsize(path) != 0:
+            f = open(path, "r")
+            l1_time = float(f.readline())
+            l2_count = float(f.readline())
+            if plot=="time":
+                val.append(l1_time)
+            elif plot=="fps":
+                val.append((l2_count/l1_time))
+            f.close()
+        else:
+            val.append(0)
+        arch.append(hw)
+        URLs.append(url)
+        xlab.append(xv)
+        xv += 1
+
+    offset = max(val)/100
+    
+    for v in val:
+        if v == 0:
+            data = 'N/A'
+            y = 0
+        else:
+            precision = 2 
+            if v >= pow(10, precision):
+                data = '{:.0f}'.format(round(v/pow(10, precision+1), precision)*pow(10, precision+1))
+            else:
+                data = '{{:.{:d}g}}'.format(round(precision)).format(v)
+            y = v + offset   
+        plt.text(diff, y, data, fontsize=12, multialignment="center",horizontalalignment="center", verticalalignment="bottom",  color='black')
+        diff += 1
+    plt.ylim(top=(max(val)+10*offset))
+    
+    plt.bar(xlab, val, width=0.8, align='center', color=clr)
+    d = -0.35
+    for name, link in zip(arch, URLs):
+        plt.annotate(name, xy=(2,2), xytext=(d, -3.0),url=link, color='tab:blue', fontsize=12, verticalalignment='top', bbox=dict(color='w', alpha=1e-6, url=link))
+        d += 1
+    plt.pause(1)
+    # to disable the disclaimer display, supply "disclaimer=False" argument
+    if disclaimer:
+        display(widgets.HTML(value=disclaimer))
+
 
 
 def liveQstat():
