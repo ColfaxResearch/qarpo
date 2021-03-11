@@ -1,8 +1,8 @@
 {
 	"job": 
 	{
-		"command": "qsub app/ocr_job.sh -l nodes=1:NODE:ARCH -F 'RESULTS TARGET FP_MODEL'",
-		"output_type": ".txt",        
+		"command": "qsub app/example_job.sh -l nodes=1:NODE:ARCH -F 'RESULTS'",
+		"output_type": ".png",        
 		"results_path": "app/results/", 
 		"results_defines" : "RESULTS",
 		"progress_indicators": 

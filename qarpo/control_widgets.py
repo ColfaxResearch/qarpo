@@ -30,7 +30,7 @@ class ControlWidget(Interface):
         self.command = command
         if item == "cancel_job":
             self.button = self.addCancelButton()
-        elif item == "telemetry":
+        elif item == "dashboard":
             self.button = self.addTelemetryButton()
     
     
@@ -50,7 +50,7 @@ class ControlWidget(Interface):
         
     
     def addTelemetryButton(self):
-        telemetry_button = widgets.Button(description='Telemetry', disabled=False, button_style='info')
+        telemetry_button = widgets.Button(description='Dashboard', disabled=False, button_style='info')
         telemetry_status = widgets.HTML(value = "")
         telemetry_box = widgets.VBox([telemetry_button, telemetry_status])
 
