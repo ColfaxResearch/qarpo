@@ -12,6 +12,7 @@ How to generate a .whl file and install qarpo library:
 
 
 run:  
+    cd qarpo    
     python3 setup.py sdist bdist_wheel    
     pip3 install <path to qarpo>/dist/<generated .whl file>    
 
@@ -19,5 +20,6 @@ run:
 OR
 run:  
 
-make  
-pip3 install <path to qarpo>/dist/<generated .whl file>  
+    cd qarpo  
+    make  
+    pip3 install <path to qarpo>/dist/<generated .whl file>  
