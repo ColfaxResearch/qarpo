@@ -11,18 +11,13 @@ For more details about how to use qarpo in your jupyter notebook, check qarpo/Ex
 How to generate a .whl file and install qarpo library:  
 
 
-run:
-
-`
+run:  
     python3 setup.py sdist bdist_wheel    
-    pip3 install <path to qarpo>/dist/<generated .whl file>
- `
+    pip3 install <path to qarpo>/dist/<generated .whl file>    
 
 
 OR
-run:
+run:  
 
-`
-    make      
-    pip3 install <path to qarpo>/dist/<generated .whl file>
-`
+make  
+pip3 install <path to qarpo>/dist/<generated .whl file>  
