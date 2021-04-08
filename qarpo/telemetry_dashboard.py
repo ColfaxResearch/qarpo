@@ -53,10 +53,15 @@ class DashboardLauncher():
     ##one_use_token: boolen , set to true if token in the url detected to open the telemetry dashboard is valid for single use
     ##exit_error: string, set to the error string to be searched for in stderr
     ##timeout: int, if job is running for n seconds and url was not detected, delete job using qdel
+    ##launch_link_msg: string, link discription for first link in the instance launcher table
+    ##reopen_link_msg: string, link discription for second link in the instance launcher table
+    ##error_contact_msg: string, error message that is displayed after a timeout
+    ##check_all_queues: boolean, set to true if qstat should search for jobs on any queue for the user
     def __init__(self, command, search_url, display_name, duration, queue, node_property, one_use_token = False, exit_error = None, timeout=1000, 
                  launch_link_msg = "Open the session for the first time.", 
                  reopen_link_msg = "Return to your currently running session.",
-                 error_contact_msg = 'Please contact the following email for support'):
+                 error_contact_msg = 'Please contact the following email for support',
+                 check_all_queues = False):
         self.command = command
         self.pointer = search_url
         self.name = display_name
@@ -71,7 +76,12 @@ class DashboardLauncher():
         self.launch_link_msg = launch_link_msg
         self.reopen_link_msg = reopen_link_msg
         self.error_contact_msg = error_contact_msg
-        prev_job, job_id = self.jobsRunning(queue)
+        self.start_time = None
+        self.check_all_queues = check_all_queues
+        if self.check_all_queues:
+            prev_job, job_id = self.jobsRunning('')
+        else:
+            prev_job, job_id = self.jobsRunning(queue)
         if prev_job == True:
             self.new_job = False
             self.jobid = job_id
@@ -83,6 +93,12 @@ class DashboardLauncher():
             self.display_box = widgets.VBox([self.start_button, self.status])
 
         def on_start_clicked(b):
+            if self.check_all_queues:
+                prev_job, prev_id = self.jobsRunning('')
+                if prev_job:
+                    self.status.value = f'Job is running: JOB_ID {prev_id}'
+                    self.display_box.children = [self.stop_button, self.status]
+                    return
             self.status.value = "Loading ..."
             queue_server = os.getenv('PBS_DEFAULT')
             match_properties = [node_property]
@@ -119,7 +135,6 @@ class DashboardLauncher():
         else:
             return True, jobs.rsplit("\n")[2].rsplit(".")[0]
 
-
     def submitDashboardJob(self):
         p = subprocess.Popen(self.command, stdout=subprocess.PIPE, shell=True)
         output, error = p.communicate()
@@ -141,7 +156,10 @@ class DashboardLauncher():
             str_ = self.pointer
             while not url_detected:
                 #Check if exit_error is provided and if it appeared in stderr log
-                if not self.exit_error == None and self.detectErr() or time.time()-self.start_time >= self.timeout:
+                if self.start_time is None:
+                    self.start_time = time.time()
+
+                if not self.exit_error == None and self.detectErr() and self.load_cancelled or time.time()-self.start_time >= self.timeout:
                     cancel_status = f'{self.name} job {self.jobid} failed. {self.error_contact_msg}'
                     self.cancelJob(cancel_status)
                     self.status.value = cancel_status
@@ -165,7 +183,10 @@ class DashboardLauncher():
                         url_return = url.split("token")[0] if self.one_use_token else url
                         #if self.new_job == True:
                         #    self.redirectURL(url)
-                        self.status.value = f'{self.name} successfully initialized.<br><table cellpadding="5" style="border:1px black solid"><tr><td style="text-align:left;color:blue;hover:purple;padding:0 15px 0 15px;"><a href="{url}" target="_blank">Launch {self.name}</a></td><td style="text-align:left">{self.launch_link_msg}</td></tr><td style="text-align:left;color:blue;hover:purple;padding:0 15px 0 15px;"><a href="{url_return}" target="_blank">Return to {self.name}</a></td><td style="text-align:left">{self.reopen_link_msg}</td></tr></table><br>JOB ID = {self.jobid}'
+                        if self.reopen_link_msg == '':
+                            self.status.value = f'{self.name} successfully initialized.<br><table cellpadding="5" style="border:1px black solid"><tr><td style="text-align:left;color:blue;hover:purple;padding:0 15px 0 15px;"><a href="{url}" target="_blank">Launch {self.name}</a></td><td style="text-align:left">{self.launch_link_msg}</td></table><br>JOB ID = {self.jobid}'
+                        else:
+                            self.status.value = f'{self.name} successfully initialized.<br><table cellpadding="5" style="border:1px black solid"><tr><td style="text-align:left;color:blue;hover:purple;padding:0 15px 0 15px;"><a href="{url}" target="_blank">Launch {self.name}</a></td><td style="text-align:left">{self.launch_link_msg}</td></tr><td style="text-align:left;color:blue;hover:purple;padding:0 15px 0 15px;"><a href="{url_return}" target="_blank">Return to {self.name}</a></td><td style="text-align:left">{self.reopen_link_msg}</td></tr></table><br>JOB ID = {self.jobid}'
                         break
 
         thread = threading.Thread(target=_work, args=())
@@ -204,6 +225,7 @@ class DashboardLauncher():
         output, err = p.communicate()
         cmd = 'qstat '+self.jobid
         cancelled = False
+
         while not cancelled:
             self.status.value = status+f'<br>JOB ID = {self.jobid}'
             self.display_box.children = [self.stop_button, self.status]
@@ -212,10 +234,6 @@ class DashboardLauncher():
             cancelled = True if output.decode().rstrip() == '' else False
             time.sleep(7.0)
         return
-
-
-
-
 
 
 
