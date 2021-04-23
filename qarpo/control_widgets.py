@@ -51,17 +51,20 @@ class ControlWidget(Interface):
     
     def addTelemetryButton(self):
         telemetry_button = widgets.Button(description='Dashboard', disabled=False, button_style='info')
-        telemetry_status = widgets.HTML(value = "")
-        telemetry_box = widgets.VBox([telemetry_button, telemetry_status])
+        telemetry_out = widgets.Output()
+        telemetry_box = widgets.VBox([telemetry_button, telemetry_out])
 
         def displayTelemetry(event):
                 if self.Int_obj.jobStillRunning(self.command):
-                    telemetry_status.value = "Telemetry results are not ready yet"
+                    with telemetry_out:
+                        telemetry_out.clear_output()
+                        status = "<p>Telemetry results are not ready yet</p>"
+                        display(HTML ('''{}'''.format(status)))
                 else:
-                    telemetry_status.value = ""
-                    URL = "https://devcloud.intel.com/edge/metrics/d/"+self.jobDict[self.command]['jobid']
-                    script=f"<script>var win = window.open('{URL}', '_blank');</script>"
-                    display(HTML ('''{}'''.format(script)))
+                    with telemetry_out:
+                        URL = "https://devcloud.intel.com/edge/metrics/d/"+self.jobDict[self.command]['jobid']
+                        script=f"<script>var win = window.open('{URL}', '_blank');</script>"
+                        display(HTML ('''{}'''.format(script)))
         telemetry_button.on_click(displayTelemetry)
         return telemetry_box
 
