@@ -57,17 +57,21 @@ class DashboardLauncher():
     ##reopen_link_msg: string, link discription for second link in the instance launcher table
     ##error_contact_msg: string, error message that is displayed after a timeout
     ##check_all_queues: boolean, set to true if qstat should search for jobs on any queue for the user
+    ##start_btn_desc: string, start button description
+    ##stop_btn_desc: string, stop button description
     def __init__(self, command, search_url, display_name, duration, queue, node_property, one_use_token = False, exit_error = None, timeout=1000, 
                  launch_link_msg = "Open the session for the first time.", 
                  reopen_link_msg = "Return to your currently running session.",
                  error_contact_msg = 'Please contact the following email for support',
-                 check_all_queues = False):
+                 check_all_queues = False,
+                 start_btn_desc = 'Start Application',
+                 stop_btn_desc = 'Stop Application'):
         self.command = command
         self.pointer = search_url
         self.name = display_name
         self.duration = duration
-        self.start_button = widgets.Button(description='Start Application', disabled=False, button_style='info')
-        self.stop_button = widgets.Button(description='Stop Application', disabled=False, button_style='info')
+        self.start_button = widgets.Button(description=start_btn_desc, disabled=False, button_style='info')
+        self.stop_button = widgets.Button(description=stop_btn_desc, disabled=False, button_style='info')
         self.status = widgets.HTML(value='')
         self.one_use_token = one_use_token
         self.exit_error = exit_error
