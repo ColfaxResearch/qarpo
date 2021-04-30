@@ -32,6 +32,8 @@ class ControlWidget(Interface):
             self.button = self.addCancelButton()
         elif item == "dashboard":
             self.button = self.addTelemetryButton()
+        elif item == "telemetry":
+            self.button = self.addTelemetryButton()
     
     
     def addCancelButton(self):
@@ -50,7 +52,7 @@ class ControlWidget(Interface):
         
     
     def addTelemetryButton(self):
-        telemetry_button = widgets.Button(description='Dashboard', disabled=False, button_style='info')
+        telemetry_button = widgets.Button(description='Telemetry', disabled=False, button_style='info')
         telemetry_out = widgets.Output()
         telemetry_box = widgets.VBox([telemetry_button, telemetry_out])
 
